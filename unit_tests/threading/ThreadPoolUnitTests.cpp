@@ -51,6 +51,28 @@ TEST_F(ThreadPoolTest, ProperDestructorShutdown)
     EXPECT_EQ(counter->load(), 5);
 }
 
+TEST_F(ThreadPoolTest, ConcurrentExecution)
+{
+    ThreadPool pool { 4 };
+    std::atomic<int> concurrentCount { 0 };
+    std::atomic<int> maxConcurrent { 0 };
+
+    for (int i = 0; i < 20; ++i) {
+        pool.loadTask([&]() {
+            ++concurrentCount;
+            int localMax = concurrentCount.load();
+            maxConcurrent.store(std::max(maxConcurrent.load(), localMax));
+
+            std::this_thread::sleep_for(100ms);
+            --concurrentCount;
+        });
+    }
+
+    std::this_thread::sleep_for(3s);
+
+    EXPECT_GE(maxConcurrent.load(), 4);
+}
+
 TEST_F(ThreadPoolTest, SubmitAfterDestruction)
 {
     auto pool = std::make_unique<ThreadPool>(2);

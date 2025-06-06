@@ -37,19 +37,20 @@ void ThreadPool::loadTask(TaskType newTask)
 void ThreadPool::worker()
 {
     while (alive) {
+        TaskType task;
         {
             LockType lock(taskMutex);
             signal.wait(lock, [this]() { return !tasks.empty() || !alive; });
             if (!alive && tasks.empty()) {
                 return;
             }
-            TaskType task = std::move(tasks.front());
+            task = std::move(tasks.front());
             tasks.pop();
             activeTasksCounter--;
             if (activeTasksCounter == 0 && tasks.empty()) {
                 signal.notify_all();
             }
-            task();
         }
+        task();
     }
 }
