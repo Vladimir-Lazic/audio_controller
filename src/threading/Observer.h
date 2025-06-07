@@ -11,19 +11,8 @@ public:
 
     virtual void update(const Subject& subject) = 0;
 
-    bool operator==(const Observer& rhs)
-    {
-        return (unique_id == rhs.unique_id);
-    }
-
 protected:
-    Observer()
-        : unique_id(static_cast<int32_t>(rand()))
-    {
-    }
-
-private:
-    int32_t unique_id { -1 };
+    Observer() = default;
 };
 
 #endif // OBSERVER_H

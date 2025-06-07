@@ -10,28 +10,30 @@ class Subject {
 public:
     virtual ~Subject() = default;
 
-    virtual void attach(const Observer& o)
+    virtual void attach(Observer* o)
     {
         observers.emplace_back(o);
     }
-    virtual void detach(const Observer& o)
+
+    virtual void detach(Observer* o)
     {
         observers.erase(
             std::remove_if(observers.begin(), observers.end(),
-                [o](const Observer& obs) { return obs == o; }),
+                [&](Observer* obs) { return obs == o; }),
             observers.end());
     }
+
     virtual void notify()
     {
-        std::for_each(observers.begin(), obervers.end(),
-            [](const Observer& obs) { obs.update(this); })
+        std::for_each(observers.begin(), observers.end(),
+            [&](Observer* obs) { obs->update(*this); });
     }
 
 protected:
     Subject() = default;
 
 private:
-    std::vector<Observer> observers;
+    std::vector<Observer*> observers;
 };
 
 #endif // SUBJECT_H
