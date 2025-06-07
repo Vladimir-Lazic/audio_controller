@@ -8,13 +8,8 @@ using namespace std::chrono_literals;
 
 class ThreadPoolTest : public ::testing::Test {
 protected:
-    void SetUp() override
-    {
-    }
-
-    void TearDown() override
-    {
-    }
+    void SetUp() override { }
+    void TearDown() override { }
 };
 
 TEST_F(ThreadPoolTest, TaskSubmissionAndExecution)

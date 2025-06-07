@@ -1,8 +1,6 @@
 #ifndef OBSERVER_H
 #define OBSERVER_H
 
-#include <cstdlib>
-
 class Subject;
 
 class Observer {

@@ -2,8 +2,8 @@
 #include "Subject.h"
 #include <algorithm>
 #include <gtest/gtest.h>
-#include <vector>
 #include <memory>
+#include <vector>
 
 class ObserverPatternTest : public ::testing::Test {
 public:
@@ -46,13 +46,8 @@ public:
     };
 
 protected:
-    void SetUp() override
-    {
-    }
-
-    void TearDown() override
-    {
-    }
+    void SetUp() override { }
+    void TearDown() override { }
 };
 
 TEST_F(ObserverPatternTest, ObserverReceivesNotifications)
