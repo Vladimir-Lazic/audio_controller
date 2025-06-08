@@ -1,19 +1,18 @@
 #ifndef WAVEFORM_GENERATOR_H
 #define WAVEFORM_GENERATOR_H
 
-#include <cmath>
 #include <vector>
 
 class WaveformGenerator {
 public:
-    WaveformGenerator();
-    ~WaveformGenerator();
+    WaveformGenerator() = default;
+    ~WaveformGenerator() = default;
 
-    std::vector<float> generateSine(float frequency, int duration, int sample_rate);
-    std::vector<float> generateSquare(float frequency, int duration, int sample_rate);
-    std::vector<float> generateSawtooth(float frequency, int duration, int sample_rate);
-    std::vector<float> generateTriangle(float frequency, int duration, int sample_rate);
-    std::vector<float> generateWhiteNoise(float frequency, int duration, int sample_rate);
+    std::vector<float> generateSineWave(float frequency, float amplitude, int sample_rate, float phase);
+    std::vector<float> generateSquare(float frequency, float amplitude, int sample_rate, float phase);
+    std::vector<float> generateSawtooth(float frequency, float amplitude, int sample_rate, float phase);
+    std::vector<float> generateTriangle(float frequency, float amplitude, int sample_rate, float phase);
+    std::vector<float> generateWhiteNoise(float frequency, float amplitude, int sample_rate, float phase);
 };
 
 #endif // WAVEFORM_GENERATOR_H

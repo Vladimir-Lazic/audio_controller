@@ -2,26 +2,23 @@
 #define AUDIO_CONTROLLER_H
 
 #include "Observer.h"
+#include "Subject.h"
 #include "WaveformGenerator.h"
 #include <vector>
 
-class AudioController {
+class AudioTasks;
+
+class AudioController : public Subject {
 public:
     AudioController();
     ~AudioController();
 
-    void play();
-    void pause();
+    void play(const std::vector<AudioTasks>& requests);
+    void pause(const std::vector<AudioTasks>& requests);
     void stop();
-    void skip();
-
-    void attachObserver(const Observer& observer);
-    void detachObserver(const Observer& observer);
-    void notify();
 
 private:
-    std::vector<Observer> observers;
-    WaveformGenerator wfGen;
+    WaveformGenerator wf_gen;
 };
 
 #endif // AUDIO_CONTROLLER_H
