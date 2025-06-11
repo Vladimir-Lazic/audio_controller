@@ -19,14 +19,14 @@ public:
     {
         observers.erase(
             std::remove_if(observers.begin(), observers.end(),
-                [&](Observer* obs) { return (obs == o) || (obs == nullptr); }),
+                [&o](Observer* obs) { return (obs == o) || (obs == nullptr); }),
             observers.end());
     }
 
     virtual void notify()
     {
         std::for_each(observers.begin(), observers.end(),
-            [&](Observer* obs) {
+            [this](Observer* obs) {
                 if (obs == nullptr) {
                     return;
                 }
