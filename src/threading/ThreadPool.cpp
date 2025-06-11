@@ -1,10 +1,10 @@
 #include "ThreadPool.h"
 
-ThreadPool::ThreadPool(int32_t numOfWorkers)
+ThreadPool::ThreadPool(int32_t num_of_workers)
     : alive { true }
-    , activeTasksCounter { 0 }
+    , active_tasks_counter { 0 }
 {
-    for (int32_t i = 0; i < numOfWorkers; i++) {
+    for (int32_t i = 0; i < num_of_workers; i++) {
         workers.emplace_back(&ThreadPool::worker, this);
     }
 }
@@ -12,8 +12,8 @@ ThreadPool::ThreadPool(int32_t numOfWorkers)
 ThreadPool::~ThreadPool()
 {
     {
-        LockType lock(taskMutex);
-        signal.wait(lock, [this]() { return (activeTasksCounter == 0) && (tasks.empty()); });
+        LockType lock(task_mutex);
+        signal.wait(lock, [this]() { return (active_tasks_counter == 0) && (tasks.empty()); });
         alive = false;
     }
 
@@ -24,12 +24,12 @@ ThreadPool::~ThreadPool()
     }
 }
 
-void ThreadPool::loadTask(TaskType newTask)
+void ThreadPool::loadTask(TaskType new_task)
 {
     {
-        LockType lock(taskMutex);
-        tasks.push(newTask);
-        activeTasksCounter++;
+        LockType lock(task_mutex);
+        tasks.push(std::move(new_task));
+        active_tasks_counter++;
     }
     signal.notify_one();
 }
@@ -39,15 +39,15 @@ void ThreadPool::worker()
     while (alive) {
         TaskType task;
         {
-            LockType lock(taskMutex);
+            LockType lock(task_mutex);
             signal.wait(lock, [this]() { return !tasks.empty() || !alive; });
             if (!alive && tasks.empty()) {
                 return;
             }
             task = std::move(tasks.front());
             tasks.pop();
-            activeTasksCounter--;
-            if (activeTasksCounter == 0 && tasks.empty()) {
+            active_tasks_counter--;
+            if (active_tasks_counter == 0 && tasks.empty()) {
                 signal.notify_all();
             }
         }

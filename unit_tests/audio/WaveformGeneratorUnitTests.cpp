@@ -9,11 +9,12 @@ protected:
     void TearDown() override { };
 
 public:
-    WaveformGenerator wf_gen;
     float freq = 440.f;
     float amplitude = 0.5f;
     float phase = 0.f;
     int sample_rate = 44100;
+
+    WaveformGenerator wf_gen;
 };
 
 TEST_F(WaveformGeneratorTestFixture, TestSineWave)
@@ -80,7 +81,7 @@ TEST_F(WaveformGeneratorTestFixture, TestTriangleWave)
 
 TEST_F(WaveformGeneratorTestFixture, TestWhiteNoise)
 {
-    auto white_noise = wf_gen.generateWhiteNoise(freq, amplitude, sample_rate, phase);
+    auto white_noise = wf_gen.generateWhiteNoise(freq, amplitude, sample_rate);
 
     auto period_samples = static_cast<size_t>(sample_rate / freq);
     ASSERT_TRUE(period_samples == white_noise.size());

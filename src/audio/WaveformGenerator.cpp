@@ -66,8 +66,7 @@ std::vector<float> WaveformGenerator::generateTriangle(float frequency,
 
 std::vector<float> WaveformGenerator::generateWhiteNoise(float frequency,
     float amplitude,
-    int sample_rate,
-    float phase)
+    int sample_rate)
 {
     std::vector<float> white_nosie(sample_rate / frequency, 0.f);
     std::random_device rd;

@@ -14,7 +14,7 @@ public:
     using LockType = std::unique_lock<std::mutex>;
     using TaskType = std::function<void()>;
 
-    ThreadPool(int32_t numOfWorkers);
+    ThreadPool(int32_t);
 
     ThreadPool(const ThreadPool&) = delete;
     ThreadPool& operator=(const ThreadPool&) = delete;
@@ -24,15 +24,15 @@ public:
 
     ~ThreadPool();
 
-    void loadTask(TaskType newTask);
+    void loadTask(TaskType);
 
 private:
     bool alive { false };
-    std::mutex taskMutex {};
+    std::mutex task_mutex {};
     std::condition_variable signal {};
     std::vector<std::thread> workers {};
     std::queue<TaskType> tasks {};
-    std::atomic<int> activeTasksCounter {};
+    std::atomic<int> active_tasks_counter {};
 
     void worker();
 };
