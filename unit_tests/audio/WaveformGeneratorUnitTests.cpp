@@ -26,9 +26,9 @@ TEST_F(WaveformGeneratorTestFixture, TestSineWave)
 
     float time = 0.f;
     for (const auto& sample : sine_wave) {
-        auto point = amplitude * std::sin(2 * std::numbers::pi * freq * time + phase);
+        float point = amplitude * std::sin(2 * std::numbers::pi * freq * time + phase);
         ASSERT_TRUE(sample == point);
-        time += 1 / sample_rate;
+        time += 1.0f / sample_rate;
     }
 }
 
@@ -43,7 +43,7 @@ TEST_F(WaveformGeneratorTestFixture, TestSquareWave)
     for (const auto& sample : square_wave) {
         float edge = (std::sin(2 * std::numbers::pi * freq * time + phase)) >= 0.f ? amplitude : -amplitude;
         ASSERT_TRUE(sample == edge);
-        time += 1 / sample_rate;
+        time += 1.0f / sample_rate;
     }
 }
 
@@ -59,7 +59,7 @@ TEST_F(WaveformGeneratorTestFixture, TestSawtoothWave)
         float local_time = fmodf(time + phase / (2 * std::numbers::pi * freq), 1.f / freq);
         float edge = (2 * amplitude * freq) * local_time - amplitude;
         ASSERT_TRUE(sample == edge);
-        time += 1 / sample_rate;
+        time += 1.0f / sample_rate;
     }
 }
 
@@ -75,7 +75,7 @@ TEST_F(WaveformGeneratorTestFixture, TestTriangleWave)
         float local_time = fmodf(time + phase / (2 * std::numbers::pi * freq), 1.f / freq);
         float edge = (4 * amplitude * freq) * std::abs(local_time - 0.5f / freq) - amplitude;
         ASSERT_TRUE(sample == edge);
-        time += 1 / sample_rate;
+        time += 1.0f / sample_rate;
     }
 }
 
