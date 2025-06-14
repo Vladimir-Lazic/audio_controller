@@ -1,7 +1,7 @@
 #ifndef LOGGER_H
 #define LOGGER_H
 
-#include "TimeUtils.h"
+#include "Utils.h"
 #include <fstream>
 #include <mutex>
 #include <string>

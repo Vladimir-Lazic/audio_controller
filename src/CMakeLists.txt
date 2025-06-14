@@ -1,11 +1,12 @@
 add_library(${PROJECT_NAME}_lib
     audio/AudioController.cpp
     audio/WaveformGenerator.cpp
+    threading/PythonObserver.cpp
     threading/ThreadPool.cpp
     threading/Observer.h
     threading/Subject.h
     utils/Logger.h
-    utils/TimeUtils.h)
+    utils/Utils.h)
 
 target_include_directories(${PROJECT_NAME}_lib PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}

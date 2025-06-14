@@ -22,7 +22,7 @@ public:
 
     class TestObserver : public Observer {
     private:
-        std::vector<std::string> notifications;
+        std::vector<float> generated_waveform;
         std::string id;
 
     public:
@@ -31,22 +31,26 @@ public:
         {
         }
 
-        void update(const Subject& subject) override
+        void update(const std::shared_ptr<std::vector<float>>& waveform_buffer) override
         {
-            auto update_subject = dynamic_cast<const TestSubject&>(subject);
-            notifications.push_back(update_subject.getId());
+            generated_waveform = *waveform_buffer;
         }
 
-        const std::vector<std::string>& getNotifications() const
+        const std::vector<float>& getGeneratedWaveform() const
         {
-            return notifications;
+            return generated_waveform;
         }
 
         const std::string& getId() const { return id; }
     };
 
+    std::shared_ptr<std::vector<float>> test_waveform;
+
 protected:
-    void SetUp() override { }
+    void SetUp() override
+    {
+        test_waveform = std::make_shared<std::vector<float>>(std::vector<float> { 1., 2., 3., 4. });
+    }
     void TearDown() override { }
 };
 
@@ -59,10 +63,10 @@ TEST_F(ObserverPatternTest, ObserverReceivesNotifications)
     subjectA.attach(observer1.get());
     subjectA.attach(observer2.get());
 
-    subjectA.notify();
+    subjectA.notify(test_waveform);
 
-    EXPECT_EQ(observer1->getNotifications(), std::vector<std::string>({ "SubjectA" }));
-    EXPECT_EQ(observer2->getNotifications(), std::vector<std::string>({ "SubjectA" }));
+    EXPECT_EQ(observer1->getGeneratedWaveform(), *test_waveform);
+    EXPECT_EQ(observer2->getGeneratedWaveform(), *test_waveform);
 }
 
 TEST_F(ObserverPatternTest, ObserverDoesNotReceiveAfterDeregistration)
@@ -71,12 +75,12 @@ TEST_F(ObserverPatternTest, ObserverDoesNotReceiveAfterDeregistration)
     std::unique_ptr<TestObserver> observer1 = std::make_unique<TestObserver>("Observer1");
 
     subjectA.attach(observer1.get());
-    subjectA.notify();
+    subjectA.notify(test_waveform);
 
     subjectA.detach(observer1.get());
-    subjectA.notify();
+    subjectA.notify(test_waveform);
 
-    EXPECT_EQ(observer1->getNotifications(), std::vector<std::string>({ "SubjectA" }));
+    EXPECT_EQ(observer1->getGeneratedWaveform(), *test_waveform);
 }
 
 TEST_F(ObserverPatternTest, MultipleSubjectsNotifySameObserver)
@@ -88,10 +92,10 @@ TEST_F(ObserverPatternTest, MultipleSubjectsNotifySameObserver)
     subjectA.attach(observer1.get());
     subjectB.attach(observer1.get());
 
-    subjectA.notify();
-    subjectB.notify();
+    subjectA.notify(test_waveform);
+    subjectB.notify(test_waveform);
 
-    EXPECT_EQ(observer1->getNotifications(), std::vector<std::string>({ "SubjectA", "SubjectB" }));
+    EXPECT_EQ(observer1->getGeneratedWaveform(), *test_waveform);
 }
 
 TEST_F(ObserverPatternTest, NotificationOrder)
@@ -105,9 +109,9 @@ TEST_F(ObserverPatternTest, NotificationOrder)
     subjectA.attach(observer2.get());
     subjectA.attach(observer3.get());
 
-    subjectA.notify();
+    subjectA.notify(test_waveform);
 
-    EXPECT_EQ(observer1->getNotifications(), std::vector<std::string>({ "SubjectA" }));
-    EXPECT_EQ(observer2->getNotifications(), std::vector<std::string>({ "SubjectA" }));
-    EXPECT_EQ(observer3->getNotifications(), std::vector<std::string>({ "SubjectA" }));
+    EXPECT_EQ(observer1->getGeneratedWaveform(), *test_waveform);
+    EXPECT_EQ(observer2->getGeneratedWaveform(), *test_waveform);
+    EXPECT_EQ(observer3->getGeneratedWaveform(), *test_waveform);
 }

@@ -5,6 +5,24 @@
 #include <ctime>
 #include <iomanip>
 #include <sstream>
+#include <vector>
+#include <iostream>
+
+class StringUtils {
+public:
+    static std::vector<std::string> split(const std::string& str, const char delimiter)
+    {
+        std::vector<std::string> tokens;
+        std::istringstream stream(str);
+        std::string token;
+
+        while (std::getline(stream, token, delimiter)) {
+            tokens.emplace_back(token);
+        }
+
+        return tokens;
+    }
+};
 
 class TimeUtils {
 public:

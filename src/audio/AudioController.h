@@ -25,7 +25,7 @@ private:
     DispatchMap map;
 
     enum Threads : int32_t { Size = 5 };
-    ThreadPool thread_pool{Threads::Size};
+    ThreadPool thread_pool { Threads::Size };
 };
 
 #endif // AUDIO_CONTROLLER_H

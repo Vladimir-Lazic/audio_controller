@@ -5,7 +5,7 @@
 class AudioControllerTestFixture : public ::testing::Test {
 public:
     class TestObserver : public Observer {
-        void update(const Subject& subject) override
+        void update(const std::shared_ptr<std::vector<float>>& subject) override
         {
             std::cout << "Task Finished" << std::endl;
         };

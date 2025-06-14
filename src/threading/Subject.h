@@ -23,14 +23,14 @@ public:
             observers.end());
     }
 
-    virtual void notify()
+    virtual void notify(const std::shared_ptr<std::vector<float>>& waveform_buffer)
     {
         std::for_each(observers.begin(), observers.end(),
-            [this](Observer* obs) {
+            [waveform_buffer](Observer* obs) {
                 if (obs == nullptr) {
                     return;
                 }
-                obs->update(*this);
+                obs->update(waveform_buffer);
             });
     }
 

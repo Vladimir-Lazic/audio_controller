@@ -1,5 +1,5 @@
 #include "Logger.h"
-#include "TimeUtils.h"
+#include "Utils.h"
 #include "gtest/gtest.h"
 
 class UtilsTestFixture : public ::testing::Test {
