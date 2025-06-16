@@ -4,12 +4,18 @@
 #include <chrono>
 #include <ctime>
 #include <iomanip>
+#include <iostream>
 #include <sstream>
 #include <vector>
-#include <iostream>
 
 class StringUtils {
 public:
+    static std::string trim(const std::string& s) {
+        auto start = s.find_first_not_of(" \n\r\t");
+        auto end = s.find_last_not_of(" \n\r\t");
+        return (start == std::string::npos) ? "" : s.substr(start, end - start + 1);
+    }
+
     static std::vector<std::string> split(const std::string& str, const char delimiter)
     {
         std::vector<std::string> tokens;
@@ -17,7 +23,7 @@ public:
         std::string token;
 
         while (std::getline(stream, token, delimiter)) {
-            tokens.emplace_back(token);
+            tokens.emplace_back(trim(token));
         }
 
         return tokens;

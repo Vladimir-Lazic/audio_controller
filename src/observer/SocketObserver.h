@@ -1,7 +1,7 @@
 #ifndef PYTHON_OBSERVER_H
 #define PYTHON_OBSERVER_H
 
-#include "AudioTaskBuilder.h"
+#include "InputHandler.h"
 #include "Observer.h"
 
 #include <netinet/in.h>
@@ -10,7 +10,9 @@
 
 class SocketObserver : public Observer {
 public:
-    SocketObserver();
+    SocketObserver(const std::string& ip_addr,
+        const int local_port,
+        const int remote_port);
     ~SocketObserver();
 
     void update(const std::shared_ptr<std::vector<float>>&) override;
@@ -18,8 +20,10 @@ public:
     std::optional<AudioTask> getSocketTask() const;
 
 private:
-    int client_socket;
-    sockaddr_in server_address;
+    int socket_fd;
+    sockaddr_in remote_addr;
+
+    InputHandler input_handler;
 };
 
 #endif // PYTHON_OBSERVER_H

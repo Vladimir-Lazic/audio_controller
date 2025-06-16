@@ -6,6 +6,7 @@ add_library(${PROJECT_NAME}_lib
     threading/ThreadPool.cpp
     observer/Observer.h
     observer/Subject.h
+    utils/InputHandler.cpp
     utils/Logger.h
     utils/Utils.h)
 

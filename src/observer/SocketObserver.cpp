@@ -1,36 +1,67 @@
 #include "SocketObserver.h"
+#include "InputHandler.h"
 
-#include <iostream>
+#include <arpa/inet.h>
 
-SocketObserver::SocketObserver()
+SocketObserver::SocketObserver(const std::string& ip_addr,
+    const int local_port,
+    const int remote_port)
 {
-    client_socket = socket(AF_INET, SOCK_DGRAM, 0);
+    socket_fd = socket(AF_INET, SOCK_DGRAM, 0);
 
-    if (client_socket == -1) {
+    if (socket_fd == -1) {
         throw std::runtime_error("Unable to create socket");
     }
 
-    server_address.sin_family = AF_INET;
-    server_address.sin_port = htons(8080);
-    server_address.sin_addr.s_addr = INADDR_ANY;
+    sockaddr_in local_addr {};
+    local_addr.sin_family = AF_INET;
+    local_addr.sin_port = htons(local_port);
+    local_addr.sin_addr.s_addr = inet_addr(ip_addr.c_str());
+
+    auto bind_result = bind(socket_fd, (struct sockaddr*)&local_addr, sizeof(local_addr));
+
+    if (bind_result < 0) {
+        throw std::runtime_error("Unable to bind socket");
+    }
+
+    remote_addr.sin_family = AF_INET;
+    remote_addr.sin_port = htons(remote_port);
+    remote_addr.sin_addr.s_addr = INADDR_ANY;
 }
 
 SocketObserver::~SocketObserver()
 {
-    close(client_socket);
+    close(socket_fd);
 }
 
 void SocketObserver::update(const std::shared_ptr<std::vector<float>>& waveform_buffer)
 {
-    sendto(client_socket,
+    sendto(socket_fd,
         reinterpret_cast<const char*>(waveform_buffer->data()),
         waveform_buffer->size() * sizeof(float),
         0,
-        (struct sockaddr*)&server_address,
-        sizeof(server_address));
+        (struct sockaddr*)&remote_addr,
+        sizeof(remote_addr));
 }
 
 std::optional<AudioTask> SocketObserver::getSocketTask() const
 {
-    return std::nullopt;
+    sockaddr_in sender_addr {};
+    socklen_t sender_len = sizeof(sender_addr);
+    char data_buffer[1024];
+
+    size_t data_len = recvfrom(socket_fd,
+        data_buffer,
+        sizeof(data_buffer) - 1,
+        0,
+        (struct sockaddr*)&sender_addr,
+        &sender_len);
+
+    if (data_len <= 0) {
+        return std::nullopt;
+    }
+
+    data_buffer[data_len] = '\0';
+
+    return input_handler.process(data_buffer);
 }
