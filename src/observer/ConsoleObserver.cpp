@@ -16,9 +16,9 @@ std::optional<AudioTask> ConsoleObserver::getConsoleTask() const
     std::string command;
     std::getline(std::cin, command);
 
-    if (command == "exit") {
+    if (command == "exit" || command == "quit") {
         return std::nullopt;
     }
-    
+
     return input_handler.process(command);
 }

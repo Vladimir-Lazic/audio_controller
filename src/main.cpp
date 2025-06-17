@@ -9,45 +9,46 @@
 
 std::atomic<bool> running { true };
 
-void signalHandler(int signal)
+void shutdownHandler(int signal)
 {
     if (signal == SIGINT) {
         running = false;
-        write(STDOUT_FILENO, "SIGINT caught\n", 14);
-        exit(0);
+        write(STDOUT_FILENO, "SIGINT caught\nWrite exit or quit to shutdown...", 48);
     }
 }
 
 int main()
 {
-    std::signal(SIGINT, signalHandler);
+    std::signal(SIGINT, shutdownHandler);
 
-    AudioController controller;
+    auto controller = std::make_shared<AudioController>();
 
-    auto console_observer = std::make_unique<ConsoleObserver>();
-    auto socket_observer = std::make_unique<SocketObserver>("127.0.0.1", 8081, 8080);
+    auto console_observer = std::make_shared<ConsoleObserver>();
+    auto socket_observer = std::make_shared<SocketObserver>("127.0.0.1", 8081, 8080);
 
-    controller.attach(console_observer.get());
-    controller.attach(socket_observer.get());
+    controller->attach(console_observer.get());
+    controller->attach(socket_observer.get());
 
     ThreadPool main_pool { 2 };
-    main_pool.loadTask([&controller, &console_observer]() {
+    main_pool.loadTask([controller = controller, observer = console_observer]() {
         while (running) {
-            auto task = console_observer->getConsoleTask();
+            auto task = observer->getConsoleTask();
             if (task) {
-                controller.play(*task);
+                controller->play(*task);
             }
         }
+        std::cout << "Exiting console observer listener" << std::endl;
     });
     std::cout << "Listening on console" << std::endl;
 
-    main_pool.loadTask([&controller, &socket_observer]() {
+    main_pool.loadTask([controller = controller, observer = socket_observer]() {
         while (running) {
-            auto task = socket_observer->getSocketTask();
+            auto task = observer->getSocketTask();
             if (task) {
-                controller.play(*task);
+                controller->play(*task);
             }
-        };
+        }
+        std::cout << "Exiting socket observer listener" << std::endl;
     });
     std::cout << "Listening on socket" << std::endl;
 
@@ -57,8 +58,9 @@ int main()
     while (running) {
     }
 
-    controller.detach(socket_observer.get());
-    controller.detach(console_observer.get());
+    controller->detach(socket_observer.get());
+    controller->detach(console_observer.get());
 
+    std::cout << "Observers detached, exiting..." << std::endl;
     return 0;
 }

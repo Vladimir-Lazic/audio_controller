@@ -10,7 +10,7 @@
 #include <unordered_map>
 #include <vector>
 
-class AudioController : public Subject {
+class AudioController : public Subject, public std::enable_shared_from_this<AudioController> {
 public:
     using DispatchMap = std::unordered_map<WaveformType, std::function<std::vector<float>(const AudioTask&)>>;
 
@@ -19,6 +19,14 @@ public:
     void stop();
 
     AudioController();
+
+    AudioController(const AudioController&) = delete;
+    AudioController& operator=(const AudioController&) = delete;
+
+    AudioController(ThreadPool&&) = delete;
+    AudioController& operator=(AudioController&&) = delete;
+
+    ~AudioController() = default;
 
 private:
     WaveformGenerator wf_gen;

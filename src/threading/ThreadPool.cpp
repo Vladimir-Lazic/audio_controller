@@ -1,5 +1,7 @@
 #include "ThreadPool.h"
 
+#include <iostream>
+
 ThreadPool::ThreadPool(int32_t num_of_workers)
     : alive { true }
     , active_tasks_counter { 0 }
@@ -13,14 +15,15 @@ ThreadPool::~ThreadPool()
 {
     {
         LockType lock(task_mutex);
-        signal.wait(lock, [this]() { return (active_tasks_counter == 0) && (tasks.empty()); });
         alive = false;
     }
 
     signal.notify_all();
 
     for (auto& worker : workers) {
-        worker.join();
+        if (worker.joinable()) {
+            worker.join();
+        }
     }
 }
 
