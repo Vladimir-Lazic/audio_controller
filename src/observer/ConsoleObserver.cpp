@@ -2,16 +2,16 @@
 
 #include <iostream>
 
-void ConsoleObserver::update(const std::shared_ptr<std::vector<float>>& waveform_buffer)
+void ConsoleObserver::update(const std::vector<float>& waveform_buffer)
 {
     std::cout << "Buffer received:";
-    for (const auto& sample : *waveform_buffer) {
+    for (const auto& sample : waveform_buffer) {
         std::cout << sample << ';';
     }
     std::cout << std::endl;
 };
 
-std::optional<AudioTask> ConsoleObserver::getConsoleTask() const
+std::optional<AudioTask> ConsoleObserver::listen()
 {
     std::string command;
     std::getline(std::cin, command);

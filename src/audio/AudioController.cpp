@@ -13,12 +13,19 @@ AudioController::AudioController()
     };
 }
 
-void AudioController::play(const AudioTask& request)
+void AudioController::play(const AudioTask& task)
 {
-    if (map.contains(request.waveform_type)) {
-        thread_pool.loadTask([this, request]() {
-            auto signal = map.at(request.waveform_type)(request);
-            notify(std::make_shared<std::vector<float>>(signal));
-        });
+    if (map.contains(task.waveform_type)) {
+        if (thread_pool) {
+            thread_pool->loadTask([this, task = task]() {
+                auto signal = map.at(task.waveform_type)(task);
+                notify(signal);
+            });
+        }
     }
+}
+
+void AudioController::addThreadPool(std::shared_ptr<ThreadPool> pool)
+{
+    thread_pool = std::move(pool);
 }

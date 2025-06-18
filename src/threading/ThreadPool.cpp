@@ -2,11 +2,11 @@
 
 #include <iostream>
 
-ThreadPool::ThreadPool(int32_t num_of_workers)
+ThreadPool::ThreadPool(size_t num_of_workers)
     : alive { true }
     , active_tasks_counter { 0 }
 {
-    for (int32_t i = 0; i < num_of_workers; i++) {
+    for (size_t i = 0; i < num_of_workers; i++) {
         workers.emplace_back(&ThreadPool::worker, this);
     }
 }

@@ -10,30 +10,21 @@
 #include <unordered_map>
 #include <vector>
 
-class AudioController : public Subject, public std::enable_shared_from_this<AudioController> {
+class AudioController : public Subject {
 public:
     using DispatchMap = std::unordered_map<WaveformType, std::function<std::vector<float>(const AudioTask&)>>;
 
-    void play(const AudioTask& request);
-    void pause(const AudioTask& requests);
-    void stop();
+    void play(const AudioTask&);
+    void pause(const AudioTask&);
+
+    void addThreadPool(std::shared_ptr<ThreadPool>);
 
     AudioController();
-
-    AudioController(const AudioController&) = delete;
-    AudioController& operator=(const AudioController&) = delete;
-
-    AudioController(ThreadPool&&) = delete;
-    AudioController& operator=(AudioController&&) = delete;
-
-    ~AudioController() = default;
 
 private:
     WaveformGenerator wf_gen;
     DispatchMap map;
-
-    enum Threads : int32_t { Size = 5 };
-    ThreadPool thread_pool { Threads::Size };
+    std::shared_ptr<ThreadPool> thread_pool;
 };
 
 #endif // AUDIO_CONTROLLER_H

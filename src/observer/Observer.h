@@ -2,7 +2,10 @@
 #define OBSERVER_H
 
 #include <memory>
+#include <optional>
 #include <vector>
+
+#include "AudioTaskBuilder.h"
 
 class Subject;
 
@@ -10,7 +13,9 @@ class Observer {
 public:
     virtual ~Observer() = default;
 
-    virtual void update(const std::shared_ptr<std::vector<float>>& waveform_buffer) = 0;
+    virtual void update(const std::vector<float>& waveform_buffer) = 0;
+
+    virtual std::optional<AudioTask> listen() = 0;
 
 protected:
     Observer() = default;

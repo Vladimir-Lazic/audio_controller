@@ -11,11 +11,11 @@ enum class WaveformType {
 };
 
 struct AudioTask {
-    WaveformType waveform_type { WaveformType::None };
-    float frequency { 0 };
-    int sample_rate { 0 };
-    float amplitude { 0 };
-    float phase { 0 };
+    WaveformType waveform_type { WaveformType::Sine };
+    float frequency { 440.0f };
+    int sample_rate { 441100 };
+    float amplitude { 1.0f };
+    float phase { 0.0f };
 };
 
 class AudioTaskBuilder {

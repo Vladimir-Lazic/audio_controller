@@ -4,78 +4,78 @@
 #include <numbers>
 #include <random>
 
-std::vector<float> WaveformGenerator::generateSineWave(float frequency,
+const WaveformGenerator::Buffer& WaveformGenerator::generateSineWave(float frequency,
     float amplitude,
     int sample_rate,
     float phase)
 {
-    std::vector<float> sine_wave(static_cast<size_t>(sample_rate / frequency + 0.5f), 0.f);
+    audio_channel.resize(static_cast<size_t>(sample_rate / frequency + 0.5f));
     float time = 0.f;
-    for (auto& sample : sine_wave) {
+    for (auto& sample : audio_channel) {
         sample = amplitude * std::sin(2 * std::numbers::pi * frequency * time + phase);
         time += 1.0f / sample_rate;
     }
-    return sine_wave;
+    return audio_channel;
 }
 
-std::vector<float> WaveformGenerator::generateSquare(float frequency,
+const WaveformGenerator::Buffer& WaveformGenerator::generateSquare(float frequency,
     float amplitude,
     int sample_rate,
     float phase)
 {
-    std::vector<float> square_wave(static_cast<size_t>(sample_rate / frequency + 0.5f), 0.f);
+    audio_channel.resize(static_cast<size_t>(sample_rate / frequency + 0.5f));
     float time = 0.f;
-    for (auto& sample : square_wave) {
+    for (auto& sample : audio_channel) {
         sample = (std::sin(2 * std::numbers::pi * frequency * time + phase) >= 0.f) ? amplitude : -amplitude;
         time += 1.0f / sample_rate;
     }
-    return square_wave;
+    return audio_channel;
 }
 
-std::vector<float> WaveformGenerator::generateSawtooth(float frequency,
+const WaveformGenerator::Buffer& WaveformGenerator::generateSawtooth(float frequency,
     float amplitude,
     int sample_rate,
     float phase)
 {
-    std::vector<float> sawtooth(static_cast<size_t>(sample_rate / frequency + 0.5f), 0.f);
+    audio_channel.resize(static_cast<size_t>(sample_rate / frequency + 0.5f));
     float time = 0.f;
-    for (auto& sample : sawtooth) {
+    for (auto& sample : audio_channel) {
         float local_time = fmodf(time + phase / (2 * std::numbers::pi * frequency), 1.f / frequency);
         sample = (2 * amplitude * frequency) * local_time - amplitude;
         time += 1.0f / sample_rate;
     }
 
-    return sawtooth;
+    return audio_channel;
 }
 
-std::vector<float> WaveformGenerator::generateTriangle(float frequency,
+const WaveformGenerator::Buffer& WaveformGenerator::generateTriangle(float frequency,
     float amplitude,
     int sample_rate,
     float phase)
 {
-    std::vector<float> triangle(static_cast<size_t>(sample_rate / frequency + 0.5f), 0.f);
+    audio_channel.resize(static_cast<size_t>(sample_rate / frequency + 0.5f));
     float time = 0.f;
-    for (auto& sample : triangle) {
+    for (auto& sample : audio_channel) {
         float local_time = fmodf(time + phase / (2 * std::numbers::pi * frequency), 1.f / frequency);
         sample = 4 * amplitude * frequency * std::abs(local_time - 0.5f / frequency) - amplitude;
         time += 1.0f / sample_rate;
     }
 
-    return triangle;
+    return audio_channel;
 }
 
-std::vector<float> WaveformGenerator::generateWhiteNoise(float frequency,
+const WaveformGenerator::Buffer& WaveformGenerator::generateWhiteNoise(float frequency,
     float amplitude,
     int sample_rate)
 {
-    std::vector<float> white_nosie(static_cast<size_t>(sample_rate / frequency + 0.5f), 0.f);
+    audio_channel.resize(static_cast<size_t>(sample_rate / frequency + 0.5f));
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution dis(-amplitude, amplitude);
 
-    for (auto& sample : white_nosie) {
+    for (auto& sample : audio_channel) {
         sample = dis(gen);
     }
 
-    return white_nosie;
+    return audio_channel;
 }

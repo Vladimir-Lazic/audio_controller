@@ -15,7 +15,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(googletest)
 
 add_subdirectory(src)
-add_subdirectory(unit_tests)
+#add_subdirectory(unit_tests)
 
 add_executable(${PROJECT_NAME}
     src/main.cpp

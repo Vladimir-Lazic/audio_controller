@@ -8,8 +8,9 @@
 
 class ConsoleObserver : public Observer {
 public:
-    void update(const std::shared_ptr<std::vector<float>>& waveform_buffer) override;
-    std::optional<AudioTask> getConsoleTask() const;
+    void update(const std::vector<float>& waveform_buffer) override;
+
+    std::optional<AudioTask> listen() override;
 
 private:
     InputHandler input_handler;

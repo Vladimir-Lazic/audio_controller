@@ -15,9 +15,9 @@ public:
         const int remote_port);
     ~SocketObserver();
 
-    void update(const std::shared_ptr<std::vector<float>>&) override;
+    void update(const std::vector<float>&) override;
 
-    std::optional<AudioTask> getSocketTask() const;
+    std::optional<AudioTask> listen() override;
 
 private:
     int socket_fd;

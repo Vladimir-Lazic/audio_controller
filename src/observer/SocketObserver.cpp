@@ -39,17 +39,17 @@ SocketObserver::~SocketObserver()
     close(socket_fd);
 }
 
-void SocketObserver::update(const std::shared_ptr<std::vector<float>>& waveform_buffer)
+void SocketObserver::update(const std::vector<float>& waveform_buffer)
 {
     sendto(socket_fd,
-        reinterpret_cast<const char*>(waveform_buffer->data()),
-        waveform_buffer->size() * sizeof(float),
+        reinterpret_cast<const char*>(waveform_buffer.data()),
+        waveform_buffer.size() * sizeof(float),
         0,
         (struct sockaddr*)&remote_addr,
         sizeof(remote_addr));
 }
 
-std::optional<AudioTask> SocketObserver::getSocketTask() const
+std::optional<AudioTask> SocketObserver::listen()
 {
     sockaddr_in sender_addr {};
     socklen_t sender_len = sizeof(sender_addr);

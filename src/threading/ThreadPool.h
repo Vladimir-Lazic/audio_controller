@@ -14,7 +14,7 @@ public:
     using LockType = std::unique_lock<std::mutex>;
     using TaskType = std::function<void()>;
 
-    ThreadPool(int32_t);
+    ThreadPool(size_t);
 
     ThreadPool(const ThreadPool&) = delete;
     ThreadPool& operator=(const ThreadPool&) = delete;
