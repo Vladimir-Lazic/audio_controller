@@ -17,9 +17,7 @@ public:
     void play(const AudioTask&);
     void pause(const AudioTask&);
 
-    void addThreadPool(std::shared_ptr<ThreadPool>);
-
-    AudioController();
+    AudioController(std::shared_ptr<ThreadPool>);
 
 private:
     WaveformGenerator wf_gen;

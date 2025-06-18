@@ -16,26 +16,24 @@ void shutdownHandler(int signal)
     }
 }
 
-using ObserverContainer = std::vector<std::shared_ptr<Observer>>;
-
 int main()
 {
     std::signal(SIGINT, shutdownHandler);
 
-    auto controller = std::make_shared<AudioController>();
+    using ObserverContainer = std::vector<std::shared_ptr<Observer>>;
     ObserverContainer observers;
 
     observers.emplace_back(std::move(std::make_shared<ConsoleObserver>()));
     observers.emplace_back(std::move(std::make_shared<SocketObserver>("127.0.0.1", 8081, 8080)));
 
+    auto main_pool = std::make_shared<ThreadPool>(observers.size() + 1);
+
+    auto controller = std::make_shared<AudioController>(main_pool);
+
     std::for_each(observers.begin(), observers.end(),
         [controller = controller](auto observer) {
             controller->attach(observer.get());
         });
-
-    auto main_pool = std::make_shared<ThreadPool>(observers.size() + 1);
-
-    controller->addThreadPool(main_pool);
 
     for (auto observer : observers) {
         main_pool->loadTask([controller = controller, observer = observer]() {

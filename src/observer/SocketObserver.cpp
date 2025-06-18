@@ -62,7 +62,7 @@ std::optional<AudioTask> SocketObserver::listen()
         (struct sockaddr*)&sender_addr,
         &sender_len);
 
-    if (data_len <= 0 && errno != EAGAIN && errno != EWOULDBLOCK) {
+    if (data_len <= 0) {
         return std::nullopt;
     }
 

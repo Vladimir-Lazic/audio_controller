@@ -2,7 +2,8 @@
 
 #include <iostream>
 
-AudioController::AudioController()
+AudioController::AudioController(std::shared_ptr<ThreadPool> pool)
+    : thread_pool(std::move(pool))
 {
     map = {
         { WaveformType::Sine, [this](const AudioTask& req) { return wf_gen.generateSineWave(req.frequency, req.amplitude, req.sample_rate, req.phase); } },
@@ -15,17 +16,8 @@ AudioController::AudioController()
 
 void AudioController::play(const AudioTask& task)
 {
-    if (map.contains(task.waveform_type)) {
-        if (thread_pool) {
-            thread_pool->loadTask([this, task = task]() {
-                auto signal = map.at(task.waveform_type)(task);
-                notify(signal);
-            });
-        }
-    }
-}
-
-void AudioController::addThreadPool(std::shared_ptr<ThreadPool> pool)
-{
-    thread_pool = std::move(pool);
+    thread_pool->loadTask([this, task = task]() {
+        auto signal = map.at(task.waveform_type)(task);
+        notify(signal);
+    });
 }

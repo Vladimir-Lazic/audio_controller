@@ -16,7 +16,7 @@ public:
     const Buffer& generateWhiteNoise(float frequency, float amplitude, int sample_rate);
 
 private:
-    Buffer audio_channel;
+    Buffer audio_channel{};
 };
 
 #endif // WAVEFORM_GENERATOR_H

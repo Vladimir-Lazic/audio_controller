@@ -10,10 +10,17 @@
 
 class StringUtils {
 public:
-    static std::string trim(const std::string& s) {
+    static std::string trim(const std::string& s)
+    {
+        if (s.empty())
+            return s;
+
         auto start = s.find_first_not_of(" \n\r\t");
+        if (start == std::string::npos)
+            return "";
+
         auto end = s.find_last_not_of(" \n\r\t");
-        return (start == std::string::npos) ? "" : s.substr(start, end - start + 1);
+        return s.substr(start, end - start + 1);
     }
 
     static std::vector<std::string> split(const std::string& str, const char delimiter)

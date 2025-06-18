@@ -6,8 +6,7 @@ enum class WaveformType {
     Sawtooth,
     Triangle,
     Square,
-    WhiteNoise,
-    None
+    WhiteNoise
 };
 
 struct AudioTask {

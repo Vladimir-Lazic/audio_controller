@@ -8,6 +8,7 @@ import numpy as np
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import json
 from enum import Enum
+import time
 
 
 class WaveformType(Enum):
@@ -34,6 +35,13 @@ class WaveformUI:
         self.frequency = tk.DoubleVar(value=440.0)
         self.phase = tk.DoubleVar(value=0.0)
         self.sample_rate = tk.IntVar(value=44100)
+        self.running = False
+        
+        self.waveform_type.trace_add("write", lambda *args: self.on_param_change())
+        self.amplitude.trace_add("write", lambda *args: self.on_param_change())
+        self.frequency.trace_add("write", lambda *args: self.on_param_change())
+        self.phase.trace_add("write", lambda *args: self.on_param_change())
+        self.sample_rate.trace_add("write", lambda *args: self.on_param_change())
 
         self.build_controls()
         self.build_plot()
@@ -73,11 +81,9 @@ class WaveformUI:
         ttk.Label(control_frame, text="Sample Rate").grid(row=8, column=0)
         sr_entry = ttk.Entry(control_frame, textvariable=self.sample_rate)
         sr_entry.grid(row=9, column=0)
-
-        send_button = ttk.Button(
-            control_frame, text="Send Params", command=self.send_params
-        )
-        send_button.grid(row=10, column=0)
+        
+        ttk.Button(control_frame, text="Play", command=self.start_sending).grid(row=10, column=0, pady=10)
+        ttk.Button(control_frame, text="Stop", command=self.stop_sending).grid(row=11, column=0)
 
     def build_plot(self):
         fig, self.ax = plt.subplots(figsize=(6, 3))
@@ -88,6 +94,10 @@ class WaveformUI:
         canvas = FigureCanvasTkAgg(fig, master=self.master)
         canvas.get_tk_widget().pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
         self.canvas = canvas
+                   
+    def on_param_change(self):
+        if self.running:
+            self.send_params() 
 
     def send_params(self):
         params = {
@@ -103,15 +113,29 @@ class WaveformUI:
 
     def listen_udp(self):
         while True:
-            data, _ = self.recv_sock.recvfrom(8192)
-            floats = struct.unpack(f"{len(data)//4}f", data)
-            self.update_plot(floats)
+            if self.running:
+                try:
+                    data, _ = self.recv_sock.recvfrom(8192)
+                    floats = struct.unpack(f"{len(data)//4}f", data)
+                    self.update_plot(floats)
+                except socket.timeout:
+                    pass
+            else:
+                time.sleep(0.05)
 
     def update_plot(self, data):
         self.line.set_ydata(data)
         self.line.set_xdata(np.arange(len(data)))
         self.ax.set_xlim(0, len(data))
         self.ax.figure.canvas.draw_idle()
+        
+    def start_sending(self):
+        if not self.running:
+            self.running = True
+            threading.Thread(target=self.send_params, daemon=True).start()
+
+    def stop_sending(self):
+        self.running = False
 
 
 def main():
