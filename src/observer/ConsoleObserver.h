@@ -8,7 +8,7 @@
 
 class ConsoleObserver : public Observer {
 public:
-    void update(const std::vector<float>& waveform_buffer) override;
+    void update(const WaveformBuffer& waveform_buffer) override;
 
     std::optional<AudioTask> listen() override;
 

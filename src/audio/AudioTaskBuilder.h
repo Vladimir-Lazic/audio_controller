@@ -1,21 +1,7 @@
 #ifndef AUDIO_TASK_BUILDER_H
 #define AUDIO_TASK_BUILDER_H
 
-enum class WaveformType {
-    Sine,
-    Sawtooth,
-    Triangle,
-    Square,
-    WhiteNoise
-};
-
-struct AudioTask {
-    WaveformType waveform_type { WaveformType::Sine };
-    float frequency { 440.0f };
-    int sample_rate { 441100 };
-    float amplitude { 1.0f };
-    float phase { 0.0f };
-};
+#include "AudioDefinitions.h"
 
 class AudioTaskBuilder {
 public:

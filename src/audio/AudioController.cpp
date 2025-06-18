@@ -1,7 +1,5 @@
 #include "AudioController.h"
 
-#include <iostream>
-
 AudioController::AudioController(std::shared_ptr<ThreadPool> pool)
     : thread_pool(std::move(pool))
 {

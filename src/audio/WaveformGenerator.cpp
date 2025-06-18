@@ -4,7 +4,7 @@
 #include <numbers>
 #include <random>
 
-const WaveformGenerator::Buffer& WaveformGenerator::generateSineWave(float frequency,
+const WaveformBuffer& WaveformGenerator::generateSineWave(float frequency,
     float amplitude,
     int sample_rate,
     float phase)
@@ -18,7 +18,7 @@ const WaveformGenerator::Buffer& WaveformGenerator::generateSineWave(float frequ
     return audio_channel;
 }
 
-const WaveformGenerator::Buffer& WaveformGenerator::generateSquare(float frequency,
+const WaveformBuffer& WaveformGenerator::generateSquare(float frequency,
     float amplitude,
     int sample_rate,
     float phase)
@@ -32,7 +32,7 @@ const WaveformGenerator::Buffer& WaveformGenerator::generateSquare(float frequen
     return audio_channel;
 }
 
-const WaveformGenerator::Buffer& WaveformGenerator::generateSawtooth(float frequency,
+const WaveformBuffer& WaveformGenerator::generateSawtooth(float frequency,
     float amplitude,
     int sample_rate,
     float phase)
@@ -48,7 +48,7 @@ const WaveformGenerator::Buffer& WaveformGenerator::generateSawtooth(float frequ
     return audio_channel;
 }
 
-const WaveformGenerator::Buffer& WaveformGenerator::generateTriangle(float frequency,
+const WaveformBuffer& WaveformGenerator::generateTriangle(float frequency,
     float amplitude,
     int sample_rate,
     float phase)
@@ -64,7 +64,7 @@ const WaveformGenerator::Buffer& WaveformGenerator::generateTriangle(float frequ
     return audio_channel;
 }
 
-const WaveformGenerator::Buffer& WaveformGenerator::generateWhiteNoise(float frequency,
+const WaveformBuffer& WaveformGenerator::generateWhiteNoise(float frequency,
     float amplitude,
     int sample_rate)
 {

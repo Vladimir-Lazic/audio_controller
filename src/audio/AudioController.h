@@ -2,11 +2,11 @@
 #define AUDIO_CONTROLLER_H
 
 #include "AudioTaskBuilder.h"
-#include "Logger.h"
 #include "Observer.h"
 #include "Subject.h"
 #include "ThreadPool.h"
 #include "WaveformGenerator.h"
+
 #include <unordered_map>
 #include <vector>
 
@@ -15,7 +15,6 @@ public:
     using DispatchMap = std::unordered_map<WaveformType, std::function<std::vector<float>(const AudioTask&)>>;
 
     void play(const AudioTask&);
-    void pause(const AudioTask&);
 
     AudioController(std::shared_ptr<ThreadPool>);
 

@@ -7,6 +7,8 @@
 
 #include <csignal>
 
+using ObserverContainer = std::vector<std::shared_ptr<Observer>>;
+
 std::atomic<bool> running { true };
 
 void shutdownHandler(int signal)
@@ -19,14 +21,12 @@ void shutdownHandler(int signal)
 int main()
 {
     std::signal(SIGINT, shutdownHandler);
-
-    using ObserverContainer = std::vector<std::shared_ptr<Observer>>;
     ObserverContainer observers;
 
     observers.emplace_back(std::move(std::make_shared<ConsoleObserver>()));
     observers.emplace_back(std::move(std::make_shared<SocketObserver>("127.0.0.1", 8081, 8080)));
 
-    auto main_pool = std::make_shared<ThreadPool>(observers.size() + 1);
+    auto main_pool = std::make_shared<ThreadPool>(observers.size() + Channels::Number);
 
     auto controller = std::make_shared<AudioController>(main_pool);
 

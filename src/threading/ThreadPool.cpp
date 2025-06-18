@@ -1,7 +1,5 @@
 #include "ThreadPool.h"
 
-#include <iostream>
-
 ThreadPool::ThreadPool(size_t num_of_workers)
     : alive { true }
     , active_tasks_counter { 0 }

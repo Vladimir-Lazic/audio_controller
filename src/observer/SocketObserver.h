@@ -15,7 +15,7 @@ public:
         const int remote_port);
     ~SocketObserver();
 
-    void update(const std::vector<float>&) override;
+    void update(const WaveformBuffer&) override;
 
     std::optional<AudioTask> listen() override;
 

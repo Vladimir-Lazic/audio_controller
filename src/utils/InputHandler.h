@@ -1,7 +1,7 @@
 #ifndef INPUT_HANDLER_H
 #define INPUT_HANDLER_H
 
-#include "AudioTaskBuilder.h"
+#include "AudioDefinitions.h"
 #include "Utils.h"
 
 #include <optional>

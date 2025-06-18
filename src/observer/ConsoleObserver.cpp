@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-void ConsoleObserver::update(const std::vector<float>& waveform_buffer)
+void ConsoleObserver::update(const WaveformBuffer& waveform_buffer)
 {
     std::cout << "Buffer received:";
     for (const auto& sample : waveform_buffer) {
