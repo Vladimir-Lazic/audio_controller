@@ -12,12 +12,17 @@ from enum import Enum
 
 # ======= ENUMS AND CONFIGURATION =======
 
+
 class WaveformType(Enum):
     Sine = 0
     Sawtooth = 1
     Triangle = 2
     Square = 3
     WhiteNoise = 4
+
+class WaveformState:
+    def __init__(self):
+        self.running = False
 
 
 # ======= COMMUNICATION / SENDER LOGIC =======
@@ -33,11 +38,13 @@ class WaveformSender:
 
 # ======= WIDGET BUILDERS / MODULAR UI COMPONENTS =======
 
+
 class WaveformControls(ttk.Frame):
-    def __init__(self, master, sender: WaveformSender, **kwargs):
+    def __init__(self, master, sender: WaveformSender, state: WaveformState, **kwargs):
         super().__init__(master, **kwargs)
         self.sender = sender
         self.build_controls()
+        self.state = state
 
     def build_controls(self):
         self.waveform_type = tk.StringVar(value="Sine")
@@ -45,12 +52,15 @@ class WaveformControls(ttk.Frame):
         self.frequency = tk.DoubleVar(value=440.0)
         self.phase = tk.DoubleVar(value=0.0)
         self.sample_rate = tk.IntVar(value=44100)
-        self.running = False
 
         # Waveform selector
         ttk.Label(self, text="Waveform Type").grid(row=0, column=0, sticky="w")
         waveform_menu = ttk.OptionMenu(
-            self, self.waveform_type, "Sine", *[w.name for w in WaveformType]
+            self,
+            self.waveform_type,
+            "Sine",
+            *[w.name for w in WaveformType],
+            command=lambda e: self.on_param_change(),
         )
         waveform_menu.grid(row=1, column=0)
 
@@ -62,10 +72,10 @@ class WaveformControls(ttk.Frame):
             to=1.0,
             variable=self.amplitude,
             orient="horizontal",
-            command=lambda e: self.on_param_change()
+            command=lambda e: self.on_param_change(),
         )
         amp_slider.grid(row=3, column=0, pady=5)
-        
+
         # Phase Slider
         ttk.Label(self, text="Phase").grid(row=4, column=0, sticky="w")
         phase_slider = ttk.Scale(
@@ -74,49 +84,53 @@ class WaveformControls(ttk.Frame):
             to=6.28,
             variable=self.phase,
             orient="horizontal",
-            command=lambda e: self.on_param_change()
+            command=lambda e: self.on_param_change(),
         )
         phase_slider.grid(row=5, column=0, pady=5)
 
         # Buttons
-        ttk.Button(self, text="Play", command=self.start_sending).grid(row=6, column=0, pady=5)
+        ttk.Button(self, text="Play", command=self.start_sending).grid(
+            row=6, column=0, pady=5
+        )
         ttk.Button(self, text="Stop", command=self.stop_sending).grid(row=7, column=0)
 
     def on_param_change(self):
-        if self.running:
+        if self.state.running:
             self.send_params()
 
     def send_params(self):
-        while self.running:
-            message = f"{WaveformType[self.waveform_type.get()].value};{self.frequency.get()};{44100};{self.amplitude.get()};{self.phase.get()}"
-            print("Sending:", message)
-            self.sender.send(message)
+        message = f"{WaveformType[self.waveform_type.get()].value};{self.frequency.get()};{44100};{self.amplitude.get()};{self.phase.get()}"
+        print("Sending:", message)
+        self.sender.send(message)
 
     def start_sending(self):
-        if not self.running:
-            self.running = True
+        if not self.state.running:
+            self.state.running = True
             self.send_params()
 
     def stop_sending(self):
-        self.running = False
+        self.state.running = False
 
 
 # ======= PLOT WIDGET =======
 
+
 class WaveformPlot(ttk.Frame):
-    def __init__(self, master, recv_port, **kwargs):
+    def __init__(self, master, recv_port, state: WaveformState, **kwargs):
         super().__init__(master, **kwargs)
         self.recv_port = recv_port
         self.recv_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.recv_sock.bind(("", self.recv_port))
         self.build_plot()
+        
+        self.state = state
 
         threading.Thread(target=self.listen_udp, daemon=True).start()
 
     def build_plot(self):
         fig, self.ax = plt.subplots(figsize=(5, 2), facecolor="black")
         self.ax.set_facecolor("black")
-        self.line, = self.ax.plot([], [], color="lawngreen")
+        (self.line,) = self.ax.plot([], [], color="lawngreen")
         self.ax.set_ylim(-1.2, 1.2)
         self.ax.set_xlim(0, 1024)
         self.ax.get_xaxis().set_visible(False)
@@ -128,8 +142,11 @@ class WaveformPlot(ttk.Frame):
     def listen_udp(self):
         while True:
             data, _ = self.recv_sock.recvfrom(8192)
-            floats = struct.unpack(f"{len(data)//4}f", data)
-            self.update_plot(floats)
+            if self.state.running:
+                floats = struct.unpack(f"{len(data)//4}f", data)
+                self.update_plot(floats)
+            else:
+                time.sleep(0.05)
 
     def update_plot(self, data):
         self.line.set_ydata(data)
@@ -140,28 +157,33 @@ class WaveformPlot(ttk.Frame):
 
 # ======= MAIN APPLICATION =======
 
+
 class WaveformApp(tk.Tk):
     def __init__(self, send_address, recv_port):
         super().__init__()
-        self.title("Retro Waveform Generator")
+        self.title("Waveform Generator")
         self.configure(bg="#444")
+        
+        self.state = WaveformState()
 
         sender = WaveformSender(send_address)
 
-        controls = WaveformControls(self, sender)
+        controls = WaveformControls(self, sender, self.state)
         controls.pack(side=tk.LEFT, fill=tk.Y, padx=10, pady=10)
 
-        plot = WaveformPlot(self, recv_port)
+        plot = WaveformPlot(self, recv_port, self.state)
         plot.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
 
 
 # ======= ENTRY POINT =======
+
 
 def main():
     send_address = ("127.0.0.1", 8081)
     recv_port = 8080
     app = WaveformApp(send_address, recv_port)
     app.mainloop()
+
 
 if __name__ == "__main__":
     main()
