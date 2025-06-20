@@ -88,11 +88,23 @@ class WaveformControls(ttk.Frame):
         )
         phase_slider.grid(row=5, column=0, pady=5)
 
+        # Frequency Slider
+        ttk.Label(self, text="Frequency").grid(row=6, column=0, sticky="w")
+        frequency_slider = ttk.Scale(
+            self,
+            from_=1.0,
+            to=5000.0,
+            variable=self.frequency,
+            orient="horizontal",
+            command=lambda e: self.on_param_change(),
+        )
+        frequency_slider.grid(row=7, column=0, pady=5)
+
         # Buttons
         ttk.Button(self, text="Play", command=self.start_sending).grid(
-            row=6, column=0, pady=5
+            row=8, column=0, pady=5
         )
-        ttk.Button(self, text="Stop", command=self.stop_sending).grid(row=7, column=0)
+        ttk.Button(self, text="Stop", command=self.stop_sending).grid(row=9, column=0)
 
     def on_param_change(self):
         if self.state.running:
@@ -141,7 +153,7 @@ class WaveformPlot(ttk.Frame):
 
     def listen_udp(self):
         while True:
-            data, _ = self.recv_sock.recvfrom(8192)
+            data, _ = self.recv_sock.recvfrom(65535) # max
             if self.state.running:
                 floats = struct.unpack(f"{len(data)//4}f", data)
                 self.update_plot(floats)

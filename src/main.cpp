@@ -7,8 +7,6 @@
 
 #include <csignal>
 
-using ObserverContainer = std::vector<std::shared_ptr<Observer>>;
-
 std::atomic<bool> running { true };
 
 void shutdownHandler(int signal)
@@ -21,7 +19,7 @@ void shutdownHandler(int signal)
 int main()
 {
     std::signal(SIGINT, shutdownHandler);
-    ObserverContainer observers;
+    std::vector<std::shared_ptr<Observer>> observers;
 
     observers.emplace_back(std::move(std::make_shared<ConsoleObserver>()));
     observers.emplace_back(std::move(std::make_shared<SocketObserver>("127.0.0.1", 8081, 8080)));
@@ -32,7 +30,7 @@ int main()
 
     std::for_each(observers.begin(), observers.end(),
         [controller = controller](auto observer) {
-            controller->attach(observer.get());
+            controller->attach(observer);
         });
 
     for (auto observer : observers) {
@@ -54,7 +52,7 @@ int main()
 
     std::for_each(observers.begin(), observers.end(),
         [controller = controller](auto observer) {
-            controller->detach(observer.get());
+            controller->detach(observer);
         });
 
     return 0;

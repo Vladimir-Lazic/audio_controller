@@ -2,6 +2,7 @@
 #define SUBJECT_H
 
 #include <algorithm>
+#include <memory>
 #include <vector>
 
 #include "AudioDefinitions.h"
@@ -12,27 +13,31 @@ class Subject {
 public:
     virtual ~Subject() = default;
 
-    virtual void attach(Observer* o)
+    virtual void attach(const std::shared_ptr<Observer>& observer)
     {
-        observers.emplace_back(o);
+        observers.emplace_back(observer);
     }
 
-    virtual void detach(Observer* o)
+    virtual void detach(const std::shared_ptr<Observer>& observer)
     {
         observers.erase(
             std::remove_if(observers.begin(), observers.end(),
-                [&o](Observer* obs) { return (obs == o) || (obs == nullptr); }),
+                [remove_candidate = observer](std::weak_ptr<Observer>& observer) {
+                    if (auto obs = observer.lock()) {
+                        return (remove_candidate == obs) || (obs == nullptr);
+                    }
+                    return false;
+                }),
             observers.end());
     }
 
     virtual void notify(const WaveformBuffer& waveform_buffer)
     {
         std::for_each(observers.begin(), observers.end(),
-            [waveform_buffer](Observer* obs) {
-                if (obs == nullptr) {
-                    return;
+            [waveform_buffer](std::weak_ptr<Observer>& observer) {
+                if (auto obs = observer.lock()) {
+                    obs->update(waveform_buffer);
                 }
-                obs->update(waveform_buffer);
             });
     }
 
@@ -40,7 +45,7 @@ protected:
     Subject() = default;
 
 private:
-    std::vector<Observer*> observers;
+    std::vector<std::weak_ptr<Observer>> observers;
 };
 
 #endif // SUBJECT_H

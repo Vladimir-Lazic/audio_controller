@@ -3,6 +3,7 @@
 
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <cstring>
 
 SocketObserver::SocketObserver(const std::string& ip_addr,
     const int local_port,
@@ -55,6 +56,7 @@ std::optional<AudioTask> SocketObserver::listen()
     sockaddr_in sender_addr {};
     socklen_t sender_len = sizeof(sender_addr);
     char data_buffer[1024];
+    memset(data_buffer, 0, sizeof(data_buffer));
 
     size_t data_len = recvfrom(socket_fd,
         data_buffer,
