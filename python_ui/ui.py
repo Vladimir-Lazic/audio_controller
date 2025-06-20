@@ -12,7 +12,6 @@ from enum import Enum
 
 # ======= ENUMS AND CONFIGURATION =======
 
-
 class WaveformType(Enum):
     Sine = 0
     Sawtooth = 1
@@ -24,7 +23,6 @@ class WaveformState:
     def __init__(self):
         self.running = False
 
-
 # ======= COMMUNICATION / SENDER LOGIC =======
 
 class WaveformSender:
@@ -35,9 +33,7 @@ class WaveformSender:
     def send(self, message: str):
         self.send_sock.sendto(message.encode("utf-8"), self.send_address)
 
-
 # ======= WIDGET BUILDERS / MODULAR UI COMPONENTS =======
-
 
 class WaveformControls(ttk.Frame):
     def __init__(self, master, sender: WaveformSender, state: WaveformState, **kwargs):
@@ -123,9 +119,7 @@ class WaveformControls(ttk.Frame):
     def stop_sending(self):
         self.state.running = False
 
-
 # ======= PLOT WIDGET =======
-
 
 class WaveformPlot(ttk.Frame):
     def __init__(self, master, recv_port, state: WaveformState, **kwargs):
@@ -134,31 +128,33 @@ class WaveformPlot(ttk.Frame):
         self.recv_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.recv_sock.bind(("", self.recv_port))
         self.build_plot()
-        
+
         self.state = state
 
         threading.Thread(target=self.listen_udp, daemon=True).start()
+        
+    def listen_udp(self):
+        while True:
+            data, _ = self.recv_sock.recvfrom(65535)  # max
+            if self.state.running:
+                print("Received size : ", len(data) // 4)
+                floats = struct.unpack(f"{len(data)//4}f", data)
+                self.update_plot(floats)
+            else:
+                time.sleep(0.05)
 
     def build_plot(self):
+        self.plot_window = 1024  # Number of samples to display
         fig, self.ax = plt.subplots(figsize=(5, 2), facecolor="black")
         self.ax.set_facecolor("black")
         (self.line,) = self.ax.plot([], [], color="lawngreen")
         self.ax.set_ylim(-1.2, 1.2)
-        self.ax.set_xlim(0, 1024)
+        self.ax.set_xlim(0, self.plot_window)
         self.ax.get_xaxis().set_visible(False)
         self.ax.get_yaxis().set_visible(False)
 
         self.canvas = FigureCanvasTkAgg(fig, master=self)
         self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
-
-    def listen_udp(self):
-        while True:
-            data, _ = self.recv_sock.recvfrom(65535) # max
-            if self.state.running:
-                floats = struct.unpack(f"{len(data)//4}f", data)
-                self.update_plot(floats)
-            else:
-                time.sleep(0.05)
 
     def update_plot(self, data):
         self.line.set_ydata(data)
@@ -166,16 +162,14 @@ class WaveformPlot(ttk.Frame):
         self.ax.set_xlim(0, len(data))
         self.ax.figure.canvas.draw_idle()
 
-
 # ======= MAIN APPLICATION =======
-
 
 class WaveformApp(tk.Tk):
     def __init__(self, send_address, recv_port):
         super().__init__()
         self.title("Waveform Generator")
         self.configure(bg="#444")
-        
+
         self.state = WaveformState()
 
         sender = WaveformSender(send_address)
@@ -189,13 +183,11 @@ class WaveformApp(tk.Tk):
 
 # ======= ENTRY POINT =======
 
-
 def main():
     send_address = ("127.0.0.1", 8081)
     recv_port = 8080
     app = WaveformApp(send_address, recv_port)
     app.mainloop()
-
 
 if __name__ == "__main__":
     main()

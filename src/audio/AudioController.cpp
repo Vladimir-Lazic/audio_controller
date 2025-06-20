@@ -8,7 +8,7 @@ AudioController::AudioController(std::shared_ptr<ThreadPool> pool)
         { WaveformType::Square, [this](const AudioTask& req) { return wf_gen.generateSquare(req.frequency, req.amplitude, req.sample_rate, req.phase); } },
         { WaveformType::Sawtooth, [this](const AudioTask& req) { return wf_gen.generateSawtooth(req.frequency, req.amplitude, req.sample_rate, req.phase); } },
         { WaveformType::Triangle, [this](const AudioTask& req) { return wf_gen.generateTriangle(req.frequency, req.amplitude, req.sample_rate, req.phase); } },
-        { WaveformType::WhiteNoise, [this](const AudioTask& req) { return wf_gen.generateWhiteNoise(req.frequency, req.amplitude, req.sample_rate); } }
+        { WaveformType::WhiteNoise, [this](const AudioTask& req) { return wf_gen.generateWhiteNoise(req.amplitude); } }
     };
 }
 

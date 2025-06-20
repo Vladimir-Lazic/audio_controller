@@ -2,8 +2,10 @@
 #include "InputHandler.h"
 
 #include <arpa/inet.h>
-#include <unistd.h>
 #include <cstring>
+#include <unistd.h>
+
+#include <iostream>
 
 SocketObserver::SocketObserver(const std::string& ip_addr,
     const int local_port,
@@ -14,11 +16,6 @@ SocketObserver::SocketObserver(const std::string& ip_addr,
     if (socket_fd == -1) {
         throw std::runtime_error("Unable to create socket");
     }
-
-    timeval timeout {}; // brief timeout so thread can check if alive status
-    timeout.tv_sec = 0;
-    timeout.tv_usec = 1000;
-    setsockopt(socket_fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
 
     sockaddr_in local_addr {};
     local_addr.sin_family = AF_INET;
