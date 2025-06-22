@@ -1,15 +1,15 @@
-#include "ThreadPool.h"
+#include "WorkerPool.h"
 
-ThreadPool::ThreadPool(size_t num_of_workers)
+WorkerPool::WorkerPool(size_t num_of_workers)
     : alive { true }
     , active_tasks_counter { 0 }
 {
     for (size_t i = 0; i < num_of_workers; i++) {
-        workers.emplace_back(&ThreadPool::worker, this);
+        workers.emplace_back(&WorkerPool::worker, this);
     }
 }
 
-ThreadPool::~ThreadPool()
+WorkerPool::~WorkerPool()
 {
     {
         LockType lock(task_mutex);
@@ -25,7 +25,7 @@ ThreadPool::~ThreadPool()
     }
 }
 
-void ThreadPool::loadTask(TaskType new_task)
+void WorkerPool::loadTask(TaskType new_task)
 {
     {
         LockType lock(task_mutex);
@@ -35,7 +35,7 @@ void ThreadPool::loadTask(TaskType new_task)
     signal.notify_one();
 }
 
-void ThreadPool::worker()
+void WorkerPool::worker()
 {
     while (alive) {
         TaskType task;

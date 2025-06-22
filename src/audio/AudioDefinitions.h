@@ -14,7 +14,7 @@ enum class WaveformType {
     WhiteNoise
 };
 
-enum class PlaybackState {
+enum class PlaybackRequest {
     Play = 0,
     Stop
 };
@@ -24,7 +24,7 @@ enum Samples : size_t { Rate = 44100 };
 enum Buffer : size_t { Frames = 256 };
 
 struct AudioTask {
-    PlaybackState playback_state { PlaybackState::Play };
+    PlaybackRequest playback_state { PlaybackRequest::Play };
     WaveformType waveform_type { WaveformType::Sine };
     float frequency { 440.0f };
     float amplitude { 1.0f };

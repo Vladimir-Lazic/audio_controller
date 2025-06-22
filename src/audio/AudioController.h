@@ -4,7 +4,7 @@
 #include "AudioTaskBuilder.h"
 #include "Observer.h"
 #include "Subject.h"
-#include "ThreadPool.h"
+#include "WorkerPool.h"
 #include "WaveformGenerator.h"
 
 #include "RtAudio.h"
@@ -23,11 +23,11 @@ public:
 
     const WaveformBuffer& getPlaybackBuffer() const;
 
-    AudioController(std::shared_ptr<ThreadPool>);
+    explicit AudioController(std::shared_ptr<WorkerPool>);
     ~AudioController();
 
 private:
-    std::shared_ptr<ThreadPool> thread_pool;
+    std::shared_ptr<WorkerPool> thread_pool;
 
     mutable WaveformBuffer playback_buffer;
     WaveformGenerator wf_gen;

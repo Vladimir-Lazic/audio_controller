@@ -4,6 +4,7 @@
 #include "AudioDefinitions.h"
 
 #include <optional>
+#include <string>
 
 class Subject;
 
@@ -13,7 +14,7 @@ public:
 
     virtual void update(const WaveformBuffer& waveform_buffer) = 0;
 
-    virtual std::optional<AudioTask> listen() = 0;
+    virtual std::optional<std::string> listen() = 0;
 
 protected:
     Observer() = default;

@@ -2,6 +2,11 @@
 
 #include <iostream>
 
+ConsoleObserver::~ConsoleObserver()
+{
+    std::cout << "Console closed" << std::endl;
+}
+
 void ConsoleObserver::update(const WaveformBuffer& waveform_buffer)
 {
     std::cout << "Buffer received:";
@@ -11,7 +16,7 @@ void ConsoleObserver::update(const WaveformBuffer& waveform_buffer)
     std::cout << std::endl;
 };
 
-std::optional<AudioTask> ConsoleObserver::listen()
+std::optional<std::string> ConsoleObserver::listen()
 {
     std::string command;
     std::getline(std::cin, command);
@@ -20,5 +25,5 @@ std::optional<AudioTask> ConsoleObserver::listen()
         return std::nullopt;
     }
 
-    return input_handler.process(command);
+    return command;
 }

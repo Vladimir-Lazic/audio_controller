@@ -7,7 +7,7 @@ class AudioTaskBuilder {
 public:
     static AudioTaskBuilder create() { return AudioTaskBuilder(); }
 
-    AudioTaskBuilder& withPlaybackState(PlaybackState state)
+    AudioTaskBuilder& withPlaybackRequest(PlaybackRequest state)
     {
         task.playback_state = state;
         return *this;

@@ -4,10 +4,10 @@ add_library(${PROJECT_NAME}_lib
     audio/AudioDefinitions.h
     observer/SocketObserver.cpp
     observer/ConsoleObserver.cpp
-    threading/ThreadPool.cpp
+    threading/WorkerPool.cpp    
+    threading/TaskPool.cpp
     observer/Observer.h
     observer/Subject.h
-    utils/InputHandler.cpp
     utils/Logger.h
     utils/Utils.h)
 

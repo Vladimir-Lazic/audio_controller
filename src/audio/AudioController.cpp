@@ -1,7 +1,7 @@
 #include "AudioController.h"
 #include "RtAudioCallback.h"
 
-AudioController::AudioController(std::shared_ptr<ThreadPool> pool)
+AudioController::AudioController(std::shared_ptr<WorkerPool> pool)
     : thread_pool(std::move(pool))
     , playback_buffer(Buffer::Frames)
     , wf_gen(playback_buffer, Buffer::Frames, Samples::Rate)
@@ -57,14 +57,14 @@ void AudioController::stop() const
 
 void AudioController::processTask(const AudioTask& task)
 {
-    if (task.playback_state == PlaybackState::Stop) {
+    if (task.playback_state == PlaybackRequest::Stop) {
         thread_pool->loadTask([this]() {
             stop();
         });
         return;
     }
 
-    auto waveform_buffer = runAsync([this, task = task]() {
+    auto waveform_buffer = threading::runAsync([this, task = task]() {
         return map.at(task.waveform_type)(task);
     }).share();
 

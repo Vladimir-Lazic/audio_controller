@@ -1,5 +1,4 @@
 #include "SocketObserver.h"
-#include "InputHandler.h"
 
 #include <arpa/inet.h>
 #include <cstring>
@@ -16,6 +15,11 @@ SocketObserver::SocketObserver(const std::string& ip_addr,
     if (socket_fd == -1) {
         throw std::runtime_error("Unable to create socket");
     }
+
+    timeval timeout {}; // brief timeout so thread can check if alive status
+    timeout.tv_sec = 0;
+    timeout.tv_usec = 1000;
+    setsockopt(socket_fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
 
     sockaddr_in local_addr {};
     local_addr.sin_family = AF_INET;
@@ -36,6 +40,7 @@ SocketObserver::SocketObserver(const std::string& ip_addr,
 SocketObserver::~SocketObserver()
 {
     close(socket_fd);
+    std::cout << "Socket closed" << std::endl;
 }
 
 void SocketObserver::update(const WaveformBuffer& waveform_buffer)
@@ -48,14 +53,14 @@ void SocketObserver::update(const WaveformBuffer& waveform_buffer)
         sizeof(remote_addr));
 }
 
-std::optional<AudioTask> SocketObserver::listen()
+std::optional<std::string> SocketObserver::listen()
 {
     sockaddr_in sender_addr {};
     socklen_t sender_len = sizeof(sender_addr);
     char data_buffer[1024];
     memset(data_buffer, 0, sizeof(data_buffer));
 
-    size_t data_len = recvfrom(socket_fd,
+    ssize_t data_len = recvfrom(socket_fd,
         data_buffer,
         sizeof(data_buffer) - 1,
         0,
@@ -68,5 +73,5 @@ std::optional<AudioTask> SocketObserver::listen()
 
     data_buffer[data_len] = '\0';
 
-    return input_handler.process(data_buffer);
+    return std::string(data_buffer, data_len);
 }
