@@ -1,10 +1,8 @@
 #ifndef AUDIO_DEFINITIONS_H
 #define AUDIO_DEFINITIONS_H
 
-#include <vector>
 #include <functional>
-
-using WaveformBuffer = std::vector<float>;
+#include <vector>
 
 enum class WaveformType {
     Sine = 0,
@@ -30,5 +28,8 @@ struct AudioTask {
     float amplitude { 1.0f };
     float phase { 0.0f };
 };
+
+using WaveformBuffer = std::vector<float>;
+using DispatchMap = std::unordered_map<WaveformType, std::function<std::vector<float>(const AudioTask&)>>;
 
 #endif // AUDIO_DEFINITIONS_H

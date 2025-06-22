@@ -1,8 +1,8 @@
 #include "AudioController.h"
 #include "RtAudioCallback.h"
 
-AudioController::AudioController(std::shared_ptr<WorkerPool> pool)
-    : thread_pool(std::move(pool))
+AudioController::AudioController(std::shared_ptr<WorkerPool> rhs)
+    : thread_pool(std::move(rhs))
     , playback_buffer(Buffer::Frames)
     , wf_gen(playback_buffer, Buffer::Frames, Samples::Rate)
 {
@@ -28,7 +28,7 @@ AudioController::AudioController(std::shared_ptr<WorkerPool> pool)
         Samples::Rate,
         &buffer_frames,
         audioCallback,
-        reinterpret_cast<void*>(this));
+        reinterpret_cast<void*>(&playback_buffer));
 }
 
 AudioController::~AudioController()
@@ -70,16 +70,11 @@ void AudioController::processTask(const AudioTask& task)
 
     thread_pool->loadTask([this, waveform_buffer]() {
         while (waveform_buffer.wait_for(std::chrono::milliseconds(10)) != std::future_status::ready) { }
-        notify(waveform_buffer.get());
+        play(waveform_buffer.get());
     });
 
     thread_pool->loadTask([this, waveform_buffer]() {
         while (waveform_buffer.wait_for(std::chrono::milliseconds(10)) != std::future_status::ready) { }
-        play(waveform_buffer.get());
+        notify(waveform_buffer.get());
     });
-}
-
-const WaveformBuffer& AudioController::getPlaybackBuffer() const
-{
-    return playback_buffer;
 }

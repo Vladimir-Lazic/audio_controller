@@ -3,25 +3,20 @@
 
 #include "AudioTaskBuilder.h"
 #include "Observer.h"
-#include "Subject.h"
-#include "WorkerPool.h"
-#include "WaveformGenerator.h"
-
 #include "RtAudio.h"
+#include "Subject.h"
+#include "WaveformGenerator.h"
+#include "WorkerPool.h"
 
 #include <unordered_map>
 #include <vector>
 
 class AudioController : public Subject {
 public:
-    using DispatchMap = std::unordered_map<WaveformType, std::function<std::vector<float>(const AudioTask&)>>;
-
     void play(const WaveformBuffer&) const;
     void stop() const;
 
     void processTask(const AudioTask&);
-
-    const WaveformBuffer& getPlaybackBuffer() const;
 
     explicit AudioController(std::shared_ptr<WorkerPool>);
     ~AudioController();
