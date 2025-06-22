@@ -5,22 +5,20 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-include(FetchContent)
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-FetchContent_Declare(
-  googletest
-  URL https://github.com/google/googletest/archive/refs/heads/main.zip
-)
+find_package(GTest REQUIRED)
+find_package(RtAudio REQUIRED)
 
-FetchContent_MakeAvailable(googletest)
+include_directories(${RTAUDIO_INCLUDE_DIR})
 
-add_subdirectory(src)
 #add_subdirectory(unit_tests)
+add_subdirectory(src)
 
 add_executable(${PROJECT_NAME}
-    src/main.cpp
+  src/main.cpp
 )
 
-target_link_libraries(${PROJECT_NAME} ${PROJECT_NAME}_lib)
+target_link_libraries(${PROJECT_NAME} ${PROJECT_NAME}_lib ${RTAUDIO_LIBRARY} asound pulse)
 
 

@@ -38,13 +38,14 @@ int main()
             while (running) {
                 auto task = observer->listen();
                 if (task) {
-                    controller->play(*task);
+                    controller->processTask(*task);
                 }
             }
         });
     }
 
-    std::cout << "input format : waveform_type;frequency;sample_rate;amplitude;phase" << std::endl;
+    std::cout << "input format : playback_state;waveform_type;frequency;amplitude;phase" << std::endl;
+    std::cout << "playback_state mapping : 0 -> Play; 1 -> Stop" << std::endl;
     std::cout << "waveform_type mapping : 0 -> sine; 1 -> sawtooth; 2 -> triangle; 3 -> square; white noise -> 4" << std::endl;
 
     while (running) {

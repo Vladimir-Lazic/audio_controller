@@ -107,8 +107,7 @@ class WaveformControls(ttk.Frame):
             self.send_params()
 
     def send_params(self):
-        message = f"{WaveformType[self.waveform_type.get()].value};{self.frequency.get()};{44100};{self.amplitude.get()};{self.phase.get()}"
-        print("Sending:", message)
+        message = f"{0};{WaveformType[self.waveform_type.get()].value};{self.frequency.get()};{self.amplitude.get()};{self.phase.get()}"
         self.sender.send(message)
 
     def start_sending(self):
@@ -118,6 +117,8 @@ class WaveformControls(ttk.Frame):
 
     def stop_sending(self):
         self.state.running = False
+        message = f"{1};{WaveformType[self.waveform_type.get()].value};{self.frequency.get()};{self.amplitude.get()};{self.phase.get()}"
+        self.sender.send(message)
 
 # ======= PLOT WIDGET =======
 

@@ -8,11 +8,22 @@
 #include <queue>
 #include <thread>
 #include <vector>
+#include <future>
+
+template <typename F, typename... Ts>
+inline auto runAsync(F&& f, Ts&&... params)
+{
+    return std::async(std::launch::async,
+        std::forward<F>(f),
+        std::forward<Ts>(params)...);
+}
 
 class ThreadPool {
 public:
     using LockType = std::unique_lock<std::mutex>;
     using TaskType = std::function<void()>;
+
+    void loadTask(TaskType);
 
     ThreadPool(size_t);
 
@@ -23,8 +34,6 @@ public:
     ThreadPool& operator=(ThreadPool&&) = delete;
 
     ~ThreadPool();
-
-    void loadTask(TaskType);
 
 private:
     bool alive { false };

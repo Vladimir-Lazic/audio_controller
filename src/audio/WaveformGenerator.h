@@ -4,18 +4,20 @@
 #include "AudioTaskBuilder.h"
 class WaveformGenerator {
 public:
-    WaveformGenerator();
-    ~WaveformGenerator() = default;
-
-    const WaveformBuffer& generateSineWave(float frequency, float amplitude, int sample_rate, float phase);
-    const WaveformBuffer& generateSquare(float frequency, float amplitude, int sample_rate, float phase);
-    const WaveformBuffer& generateSawtooth(float frequency, float amplitude, int sample_rate, float phase);
-    const WaveformBuffer& generateTriangle(float frequency, float amplitude, int sample_rate, float phase);
+    const WaveformBuffer& generateSineWave(float frequency, float amplitude, float phase);
+    const WaveformBuffer& generateSquare(float frequency, float amplitude, float phase);
+    const WaveformBuffer& generateSawtooth(float frequency, float amplitude, float phase);
+    const WaveformBuffer& generateTriangle(float frequency, float amplitude, float phase);
     const WaveformBuffer& generateWhiteNoise(float amplitude);
 
+    explicit WaveformGenerator(WaveformBuffer&, size_t, size_t);
+    ~WaveformGenerator() = default;
+
 private:
-    WaveformBuffer audio_channel {};
-    size_t default_buffer_size { 100 };
+    size_t buffer_size { 256 };
+    size_t sample_rate { 44100 };
+
+    WaveformBuffer& playback_buffer;
 };
 
 #endif // WAVEFORM_GENERATOR_H

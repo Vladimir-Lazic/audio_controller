@@ -6,4 +6,4 @@ file(GLOB TEST_SOURCES
 
 add_executable(unit_tests ${TEST_SOURCES})
 
-target_link_libraries(unit_tests gtest_main audio_controller_lib)
+target_link_libraries(unit_tests GTest::gtest_main audio_controller_lib)

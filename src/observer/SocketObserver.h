@@ -10,14 +10,14 @@
 
 class SocketObserver : public Observer {
 public:
+    void update(const WaveformBuffer&) override;
+
+    std::optional<AudioTask> listen() override;
+
     SocketObserver(const std::string& ip_addr,
         const int local_port,
         const int remote_port);
     ~SocketObserver();
-
-    void update(const WaveformBuffer&) override;
-
-    std::optional<AudioTask> listen() override;
 
 private:
     int socket_fd;

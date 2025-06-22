@@ -34,9 +34,9 @@ public:
     virtual void notify(const WaveformBuffer& waveform_buffer)
     {
         std::for_each(observers.begin(), observers.end(),
-            [waveform_buffer](std::weak_ptr<Observer>& observer) {
+            [buffer = waveform_buffer](std::weak_ptr<Observer>& observer) {
                 if (auto obs = observer.lock()) {
-                    obs->update(waveform_buffer);
+                    obs->update(buffer);
                 }
             });
     }

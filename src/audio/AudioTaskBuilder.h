@@ -7,6 +7,12 @@ class AudioTaskBuilder {
 public:
     static AudioTaskBuilder create() { return AudioTaskBuilder(); }
 
+    AudioTaskBuilder& withPlaybackState(PlaybackState state)
+    {
+        task.playback_state = state;
+        return *this;
+    }
+
     AudioTaskBuilder& withWaveform(WaveformType type)
     {
         task.waveform_type = type;
@@ -16,12 +22,6 @@ public:
     AudioTaskBuilder& withFrequency(float freq)
     {
         task.frequency = freq;
-        return *this;
-    }
-
-    AudioTaskBuilder& withSampleRate(int sample_rate)
-    {
-        task.sample_rate = sample_rate;
         return *this;
     }
 
