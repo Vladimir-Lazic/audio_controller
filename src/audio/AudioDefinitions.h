@@ -1,10 +1,11 @@
 #ifndef AUDIO_DEFINITIONS_H
 #define AUDIO_DEFINITIONS_H
 
-#include <vector>
 #include <functional>
+#include <unordered_map>
+#include <vector>
 
-using WaveformBuffer = std::vector<float>;
+#include <boost/lockfree/queue.hpp>
 
 enum class WaveformType {
     Sine = 0,
@@ -21,7 +22,7 @@ enum class PlaybackState {
 
 enum Channels : size_t { Number = 1 };
 enum Samples : size_t { Rate = 44100 };
-enum Buffer : size_t { Frames = 256 };
+enum Buffer : size_t { Frames = 32 };
 
 struct AudioTask {
     PlaybackState playback_state { PlaybackState::Play };
@@ -31,4 +32,6 @@ struct AudioTask {
     float phase { 0.0f };
 };
 
+using WaveformBuffer = boost::lockfree::queue<float>;
+using DispatchMap = std::unordered_map<WaveformType, std::function<float(const AudioTask&, float)>>;
 #endif // AUDIO_DEFINITIONS_H

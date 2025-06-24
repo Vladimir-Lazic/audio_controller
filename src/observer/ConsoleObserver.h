@@ -4,13 +4,13 @@
 #include "InputHandler.h"
 #include "Observer.h"
 
-#include <optional>
-
 class ConsoleObserver : public Observer {
 public:
-    void update(const WaveformBuffer& waveform_buffer) override;
+    void update(const float& sample) override;
 
     std::optional<AudioTask> listen() override;
+
+    ~ConsoleObserver();
 
 private:
     InputHandler input_handler;

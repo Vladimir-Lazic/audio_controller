@@ -1,10 +1,10 @@
 add_library(${PROJECT_NAME}_lib
     audio/AudioController.cpp
-    audio/WaveformGenerator.cpp
     audio/AudioDefinitions.h
     observer/SocketObserver.cpp
     observer/ConsoleObserver.cpp
-    threading/ThreadPool.cpp
+    threading/WorkerPool.cpp
+    threading/Threading.h
     observer/Observer.h
     observer/Subject.h
     utils/InputHandler.cpp

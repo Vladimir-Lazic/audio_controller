@@ -122,45 +122,67 @@ class WaveformControls(ttk.Frame):
 
 # ======= PLOT WIDGET =======
 
+from collections import deque
+
+import tkinter as tk
+from tkinter import ttk
+import socket
+import struct
+import threading
+import queue
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.animation import FuncAnimation
+
 class WaveformPlot(ttk.Frame):
-    def __init__(self, master, recv_port, state: WaveformState, **kwargs):
+    def __init__(self, master, recv_port, state, **kwargs):
         super().__init__(master, **kwargs)
         self.recv_port = recv_port
-        self.recv_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.recv_sock.bind(("", self.recv_port))
-        self.build_plot()
-
         self.state = state
 
+        self.data_queue = queue.Queue(maxsize=128)
+        self.build_plot()
+
         threading.Thread(target=self.listen_udp, daemon=True).start()
-        
-    def listen_udp(self):
-        while True:
-            data, _ = self.recv_sock.recvfrom(65535)  # max
-            if self.state.running:
-                print("Received size : ", len(data) // 4)
-                floats = struct.unpack(f"{len(data)//4}f", data)
-                self.update_plot(floats)
-            else:
-                time.sleep(0.05)
+
+        self.ani = FuncAnimation(self.fig, self.animate_plot, interval=30, cache_frame_data=False)
 
     def build_plot(self):
-        self.plot_window = 1024  # Number of samples to display
-        fig, self.ax = plt.subplots(figsize=(5, 2), facecolor="black")
+        self.fig, self.ax = plt.subplots(figsize=(5, 2), facecolor="black")
         self.ax.set_facecolor("black")
         (self.line,) = self.ax.plot([], [], color="lawngreen")
         self.ax.set_ylim(-1.2, 1.2)
-        self.ax.set_xlim(0, self.plot_window)
+        self.ax.set_xlim(0, 128)
         self.ax.get_xaxis().set_visible(False)
         self.ax.get_yaxis().set_visible(False)
 
-        self.canvas = FigureCanvasTkAgg(fig, master=self)
+        self.canvas = FigureCanvasTkAgg(self.fig, master=self)
         self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
 
-    def update_plot(self, data):
-        self.line.set_ydata(data)
-        self.line.set_xdata(np.arange(len(data)))
-        self.ax.set_xlim(0, len(data))
+    def listen_udp(self):
+        recv_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        recv_sock.bind(("", self.recv_port))
+        while True:
+            data, _ = recv_sock.recvfrom(65535)
+            if self.state.running:
+                floats = struct.unpack(f"{len(data)//4}f", data)
+                for value in floats:
+                    # Maintain a fixed size queue
+                    if self.data_queue.full():
+                        self.data_queue.get()
+                    self.data_queue.put(value)
+            else:
+                time.sleep(0.05)
+
+    def animate_plot(self, frame):
+        if self.data_queue.empty():
+            return
+
+        data = list(self.data_queue.queue)
+
+        self.line.set_data(np.arange(len(data)), data)
+        self.ax.set_xlim(0, 128)
         self.ax.figure.canvas.draw_idle()
 
 # ======= MAIN APPLICATION =======
@@ -180,7 +202,6 @@ class WaveformApp(tk.Tk):
 
         plot = WaveformPlot(self, recv_port, self.state)
         plot.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
-
 
 # ======= ENTRY POINT =======
 

@@ -2,13 +2,16 @@
 
 #include <iostream>
 
-void ConsoleObserver::update(const WaveformBuffer& waveform_buffer)
+ConsoleObserver::~ConsoleObserver()
 {
-    std::cout << "Buffer received:";
-    for (const auto& sample : waveform_buffer) {
+    std::cout << "Console closed" << std::endl;
+}
+
+void ConsoleObserver::update(const float& sample)
+{
+    if (sample != 0.0f) {
         std::cout << sample << ';';
     }
-    std::cout << std::endl;
 };
 
 std::optional<AudioTask> ConsoleObserver::listen()

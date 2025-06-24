@@ -5,12 +5,11 @@
 #include "Observer.h"
 
 #include <netinet/in.h>
-#include <optional>
 #include <sys/socket.h>
 
 class SocketObserver : public Observer {
 public:
-    void update(const WaveformBuffer&) override;
+    void update(const float&) override;
 
     std::optional<AudioTask> listen() override;
 

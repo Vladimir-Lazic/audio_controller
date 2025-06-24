@@ -2,7 +2,7 @@
 #include "ConsoleObserver.h"
 #include "Logger.h"
 #include "SocketObserver.h"
-#include "ThreadPool.h"
+#include "WorkerPool.h"
 #include "Utils.h"
 
 #include <csignal>
@@ -24,9 +24,10 @@ int main()
     observers.emplace_back(std::move(std::make_shared<ConsoleObserver>()));
     observers.emplace_back(std::move(std::make_shared<SocketObserver>("127.0.0.1", 8081, 8080)));
 
-    auto main_pool = std::make_shared<ThreadPool>(observers.size() + Channels::Number);
+    auto main_pool = std::make_shared<WorkerPool>(observers.size() + Channels::Number);
+    auto buffer = std::make_shared<WaveformBuffer>(Buffer::Frames);
 
-    auto controller = std::make_shared<AudioController>(main_pool);
+    auto controller = std::make_shared<AudioController>(main_pool, buffer);
 
     std::for_each(observers.begin(), observers.end(),
         [controller = controller](auto observer) {
@@ -34,11 +35,11 @@ int main()
         });
 
     for (auto observer : observers) {
-        main_pool->loadTask([controller = controller, observer = observer]() {
+        main_pool->loadWorker([controller = controller, observer = observer]() {
             while (running) {
                 auto task = observer->listen();
                 if (task) {
-                    controller->processTask(*task);
+                    controller->play(*task);
                 }
             }
         });

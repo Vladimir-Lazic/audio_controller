@@ -4,8 +4,7 @@
 #include "AudioTaskBuilder.h"
 #include "Observer.h"
 #include "Subject.h"
-#include "ThreadPool.h"
-#include "WaveformGenerator.h"
+#include "WorkerPool.h"
 
 #include "RtAudio.h"
 
@@ -14,28 +13,35 @@
 
 class AudioController : public Subject {
 public:
-    using DispatchMap = std::unordered_map<WaveformType, std::function<std::vector<float>(const AudioTask&)>>;
+    void play(const AudioTask& task);
+    void stop();
 
-    void play(const WaveformBuffer&) const;
-    void stop() const;
-
-    void processTask(const AudioTask&);
-
-    const WaveformBuffer& getPlaybackBuffer() const;
-
-    AudioController(std::shared_ptr<ThreadPool>);
+    explicit AudioController(std::shared_ptr<WorkerPool>, std::shared_ptr<WaveformBuffer>);
     ~AudioController();
 
 private:
-    std::shared_ptr<ThreadPool> thread_pool;
+    std::shared_ptr<WorkerPool> worker_pool;
 
-    mutable WaveformBuffer playback_buffer;
-    WaveformGenerator wf_gen;
+    std::shared_ptr<WaveformBuffer> waveform_buffer;
+    std::mutex buffer_mutex;
+
+    std::atomic<bool> running { false };
+
+    AudioTask active_task;
+    std::mutex task_mutex;
+
+    RtAudio dac;
+    unsigned int buffer_frames { Buffer::Frames };
+    RtAudio::StreamParameters stream_parameters;
+
+    int sample_rate { Samples::Rate };
     DispatchMap map;
 
-    mutable RtAudio dac;
-    mutable unsigned int buffer_frames { Buffer::Frames };
-    RtAudio::StreamParameters stream_parameters;
+    float SineWave(float phase, float frequency, float amplitude);
+    float SquareWave(float phase, float frequency, float amplitude);
+    float SawtoothWave(float phase, float frequency, float amplitude);
+    float TriangleWave(float phase, float frequency, float amplitude);
+    float WhiteNoise(float amplitude);
 };
 
 #endif // AUDIO_CONTROLLER_H

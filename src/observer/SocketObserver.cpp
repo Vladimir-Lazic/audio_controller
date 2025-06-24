@@ -1,5 +1,4 @@
 #include "SocketObserver.h"
-#include "InputHandler.h"
 
 #include <arpa/inet.h>
 #include <cstring>
@@ -36,13 +35,14 @@ SocketObserver::SocketObserver(const std::string& ip_addr,
 SocketObserver::~SocketObserver()
 {
     close(socket_fd);
+    std::cout << "Socket closed" << std::endl;
 }
 
-void SocketObserver::update(const WaveformBuffer& waveform_buffer)
+void SocketObserver::update(const float& sample)
 {
     sendto(socket_fd,
-        reinterpret_cast<const char*>(waveform_buffer.data()),
-        waveform_buffer.size() * sizeof(float),
+        reinterpret_cast<const char*>(&sample),
+        sizeof(float),
         0,
         (struct sockaddr*)&remote_addr,
         sizeof(remote_addr));

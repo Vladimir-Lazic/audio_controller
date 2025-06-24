@@ -1,4 +1,4 @@
-#include "ThreadPool.h"
+#include "WorkerPool.h"
 #include <atomic>
 #include <chrono>
 #include <gtest/gtest.h>
@@ -6,15 +6,15 @@
 
 using namespace std::chrono_literals;
 
-class ThreadPoolTest : public ::testing::Test {
+class WorkerPoolTest : public ::testing::Test {
 protected:
     void SetUp() override { }
     void TearDown() override { }
 };
 
-TEST_F(ThreadPoolTest, TaskSubmissionAndExecution)
+TEST_F(WorkerPoolTest, TaskSubmissionAndExecution)
 {
-    ThreadPool pool { 4 };
+    WorkerPool pool { 4 };
     std::atomic<int> counter { 0 };
 
     for (int i = 0; i < 10; ++i) {
@@ -29,12 +29,12 @@ TEST_F(ThreadPoolTest, TaskSubmissionAndExecution)
     EXPECT_EQ(counter.load(), 10);
 }
 
-TEST_F(ThreadPoolTest, ProperDestructorShutdown)
+TEST_F(WorkerPoolTest, ProperDestructorShutdown)
 {
     auto counter = std::make_shared<std::atomic<int>>(0);
 
     {
-        ThreadPool pool { 2 };
+        WorkerPool pool { 2 };
         for (int i = 0; i < 5; ++i) {
             pool.loadTask([counter]() {
                 std::this_thread::sleep_for(100ms);
@@ -46,9 +46,9 @@ TEST_F(ThreadPoolTest, ProperDestructorShutdown)
     EXPECT_EQ(counter->load(), 5);
 }
 
-TEST_F(ThreadPoolTest, ConcurrentExecution)
+TEST_F(WorkerPoolTest, ConcurrentExecution)
 {
-    ThreadPool pool { 4 };
+    WorkerPool pool { 4 };
     std::atomic<int> concurrentCount { 0 };
     std::atomic<int> maxConcurrent { 0 };
 
@@ -68,9 +68,9 @@ TEST_F(ThreadPoolTest, ConcurrentExecution)
     EXPECT_GE(maxConcurrent.load(), 4);
 }
 
-TEST_F(ThreadPoolTest, SubmitAfterDestruction)
+TEST_F(WorkerPoolTest, SubmitAfterDestruction)
 {
-    auto pool = std::make_unique<ThreadPool>(2);
+    auto pool = std::make_unique<WorkerPool>(2);
     pool->loadTask([]() {
         std::this_thread::sleep_for(50ms);
     });
@@ -80,10 +80,10 @@ TEST_F(ThreadPoolTest, SubmitAfterDestruction)
     SUCCEED();
 }
 
-TEST_F(ThreadPoolTest, NoTasksSubmitted)
+TEST_F(WorkerPoolTest, NoTasksSubmitted)
 {
     {
-        ThreadPool pool { 2 };
+        WorkerPool pool { 2 };
     }
     SUCCEED();
 }
