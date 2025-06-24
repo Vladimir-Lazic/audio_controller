@@ -25,7 +25,7 @@ WorkerPool::~WorkerPool()
     }
 }
 
-void WorkerPool::loadTask(TaskType new_task)
+void WorkerPool::loadWorker(TaskType new_task)
 {
     {
         LockType lock(task_mutex);

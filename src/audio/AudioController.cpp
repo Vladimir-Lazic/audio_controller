@@ -1,22 +1,15 @@
 #include "AudioController.h"
 #include "RtAudioCallback.h"
 
-AudioController::AudioController(std::shared_ptr<WorkerPool> rhs)
-    : thread_pool(std::move(rhs))
-    , playback_buffer(Buffer::Frames)
-    , wf_gen(playback_buffer, Buffer::Frames, Samples::Rate)
+AudioController::AudioController(std::shared_ptr<WorkerPool> workers, std::shared_ptr<TaskPool> tasks)
+    : thread_pool(std::move(workers))
+    , task_pool(std::move(tasks))
+    , audio_queue(std::make_shared<AudioQueue>(Buffer::Frames))
+    , wf_gen(audio_queue)
 {
     if (dac.getDeviceCount() < 1) {
         throw std::runtime_error("No audio deviced found!");
     }
-
-    map = {
-        { WaveformType::Sine, [this](const AudioTask& req) { return wf_gen.generateSineWave(req.frequency, req.amplitude, req.phase); } },
-        { WaveformType::Square, [this](const AudioTask& req) { return wf_gen.generateSquare(req.frequency, req.amplitude, req.phase); } },
-        { WaveformType::Sawtooth, [this](const AudioTask& req) { return wf_gen.generateSawtooth(req.frequency, req.amplitude, req.phase); } },
-        { WaveformType::Triangle, [this](const AudioTask& req) { return wf_gen.generateTriangle(req.frequency, req.amplitude, req.phase); } },
-        { WaveformType::WhiteNoise, [this](const AudioTask& req) { return wf_gen.generateWhiteNoise(req.amplitude); } }
-    };
 
     stream_parameters.deviceId = dac.getDefaultOutputDevice();
     stream_parameters.nChannels = Channels::Number;
@@ -24,15 +17,42 @@ AudioController::AudioController(std::shared_ptr<WorkerPool> rhs)
 
     dac.openStream(&stream_parameters,
         nullptr,
-        RTAUDIO_FLOAT64,
+        RTAUDIO_FLOAT32,
         Samples::Rate,
         &buffer_frames,
         audioCallback,
-        reinterpret_cast<void*>(&playback_buffer));
+        reinterpret_cast<void*>(audio_queue.get()));
+
+    dac.startStream();
+
+    alive = true;
+    audio_task.playback_state = PlaybackState::Stop;
+
+    thread_pool->loadWorker([this]() {
+        while (alive) {
+            AudioTask task;
+            {
+                threading::LockType lock(audio_task_mutex);
+                task = audio_task;
+            }
+            play(task);
+        }
+    });
+
+    thread_pool->loadWorker([this]() {
+        while (alive) {
+            float sample = 0.0f;
+            if (audio_queue->pop(sample)) {
+                notify(sample);
+            }
+        }
+    });
 }
 
 AudioController::~AudioController()
 {
+    alive = false;
+
     if (dac.isStreamRunning()) {
         dac.stopStream();
     }
@@ -40,41 +60,31 @@ AudioController::~AudioController()
     if (dac.isStreamOpen()) {
         dac.closeStream();
     }
+
+    std::cout << "Stream Closed, Audio Controller destroyed" << std::endl;
 }
 
-void AudioController::play(const WaveformBuffer& buffer) const
+void AudioController::query()
 {
-    playback_buffer = buffer;
-    dac.startStream();
-}
-
-void AudioController::stop() const
-{
-    if (dac.isStreamRunning()) {
-        dac.stopStream();
+    auto task = task_pool->getTask();
+    if (task) {
+        threading::LockType lock(audio_task_mutex);
+        audio_task = *task;
     }
 }
 
-void AudioController::processTask(const AudioTask& task)
+void AudioController::play(const AudioTask& task)
 {
-    if (task.playback_state == PlaybackRequest::Stop) {
-        thread_pool->loadTask([this]() {
-            stop();
-        });
+    if (task.playback_state == PlaybackState::Stop) {
+        stop();
         return;
     }
 
-    auto waveform_buffer = threading::runAsync([this, task = task]() {
-        return map.at(task.waveform_type)(task);
-    }).share();
+    wf_gen.generate(task);
+}
 
-    thread_pool->loadTask([this, waveform_buffer]() {
-        while (waveform_buffer.wait_for(std::chrono::milliseconds(10)) != std::future_status::ready) { }
-        play(waveform_buffer.get());
-    });
-
-    thread_pool->loadTask([this, waveform_buffer]() {
-        while (waveform_buffer.wait_for(std::chrono::milliseconds(10)) != std::future_status::ready) { }
-        notify(waveform_buffer.get());
-    });
+void AudioController::stop()
+{
+    float dummy;
+    while (audio_queue->pop(dummy)) { }
 }

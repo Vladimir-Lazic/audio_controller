@@ -5,7 +5,7 @@
 
 using namespace threading;
 
-void TaskPool::processRequest(const std::string& request)
+void TaskPool::loadTask(const std::string& request)
 {
     auto token = ';';
     auto parsed_commands = StringUtils::split(request, token);
@@ -15,7 +15,7 @@ void TaskPool::processRequest(const std::string& request)
     }
 
     auto task = AudioTaskBuilder::create()
-                    .withPlaybackRequest(static_cast<PlaybackRequest>(std::stoi(parsed_commands[0])))
+                    .withPlaybackState(static_cast<PlaybackState>(std::stoi(parsed_commands[0])))
                     .withWaveform(static_cast<WaveformType>(std::stoi(parsed_commands[1])))
                     .withFrequency(std::stof(parsed_commands[2]))
                     .withAmplitude(std::stof(parsed_commands[3]))
@@ -26,7 +26,7 @@ void TaskPool::processRequest(const std::string& request)
     tasks.push(std::move(task));
 }
 
-std::optional<AudioTask> TaskPool::query()
+std::optional<AudioTask> TaskPool::getTask()
 {
     LockType lock(task_mutex);
     if (tasks.empty()) {

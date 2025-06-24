@@ -5,7 +5,7 @@
 
 class ConsoleObserver : public Observer {
 public:
-    void update(const WaveformBuffer& waveform_buffer) override;
+    void update(const float& sample) override;
 
     std::optional<std::string> listen() override;
 

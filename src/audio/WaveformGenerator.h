@@ -2,22 +2,27 @@
 #define WAVEFORM_GENERATOR_H
 
 #include "AudioTaskBuilder.h"
+
+#include <memory>
+
 class WaveformGenerator {
 public:
-    const WaveformBuffer& generateSineWave(float frequency, float amplitude, float phase);
-    const WaveformBuffer& generateSquare(float frequency, float amplitude, float phase);
-    const WaveformBuffer& generateSawtooth(float frequency, float amplitude, float phase);
-    const WaveformBuffer& generateTriangle(float frequency, float amplitude, float phase);
-    const WaveformBuffer& generateWhiteNoise(float amplitude);
-
-    explicit WaveformGenerator(WaveformBuffer&, size_t, size_t);
+    explicit WaveformGenerator(std::shared_ptr<AudioQueue>);
     ~WaveformGenerator() = default;
 
-private:
-    size_t buffer_size { 256 };
-    size_t sample_rate { 44100 };
+    void generate(const AudioTask& task);
 
-    WaveformBuffer& playback_buffer;
+private:
+    void SineWave(float frequency, float amplitude, float phase);
+    void Square(float frequency, float amplitude, float phase);
+    void Sawtooth(float frequency, float amplitude, float phase);
+    void Triangle(float frequency, float amplitude, float phase);
+    void WhiteNoise(float amplitude);
+
+    std::shared_ptr<AudioQueue> audio_queue;
+    int sample_rate { Samples::Rate };
+
+    DispatchMap map;
 };
 
 #endif // WAVEFORM_GENERATOR_H

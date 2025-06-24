@@ -5,8 +5,6 @@
 #include <memory>
 #include <vector>
 
-#include "AudioDefinitions.h"
-
 class Observer;
 
 class Subject {
@@ -31,12 +29,12 @@ public:
             observers.end());
     }
 
-    virtual void notify(const WaveformBuffer& waveform_buffer)
+    virtual void notify(const float& sample)
     {
         std::for_each(observers.begin(), observers.end(),
-            [buffer = waveform_buffer](std::weak_ptr<Observer>& observer) {
+            [sample = sample](std::weak_ptr<Observer>& observer) {
                 if (auto obs = observer.lock()) {
-                    obs->update(buffer);
+                    obs->update(sample);
                 }
             });
     }

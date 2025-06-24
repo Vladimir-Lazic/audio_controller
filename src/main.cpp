@@ -28,22 +28,21 @@ int main()
     observers.emplace_back(std::move(std::make_shared<SocketObserver>("127.0.0.1", 8081, 8080)));
 
     auto main_pool = std::make_shared<WorkerPool>(observers.size() + 2 * Channels::Number);
+    auto task_pool = std::make_shared<TaskPool>();
 
-    auto controller = std::make_shared<AudioController>(main_pool);
+    auto controller = std::make_shared<AudioController>(main_pool, task_pool);
 
     std::for_each(observers.begin(), observers.end(),
         [controller = controller](const auto& observer) {
             controller->attach(observer);
         });
 
-    auto task_pool = std::make_shared<TaskPool>();
-
     for (auto observer : observers) {
-        main_pool->loadTask([task_pool = task_pool, observer = observer]() {
+        main_pool->loadWorker([task_pool = task_pool, observer = observer]() {
             while (running) {
-                auto request = observer->listen();
-                if (request) {
-                    task_pool->processRequest(*request);
+                auto task = observer->listen();
+                if (task) {
+                    task_pool->loadTask(*task);
                 }
             }
         });
@@ -54,10 +53,7 @@ int main()
     std::cout << "waveform_type mapping : 0 -> sine; 1 -> sawtooth; 2 -> triangle; 3 -> square; white noise -> 4" << std::endl;
 
     while (running) {
-        auto task = task_pool->query();
-        if (task) {
-            controller->processTask(*task);
-        }
+        controller->query();
     }
 
     std::for_each(observers.begin(), observers.end(),

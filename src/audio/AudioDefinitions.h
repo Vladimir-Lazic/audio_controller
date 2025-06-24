@@ -4,6 +4,8 @@
 #include <functional>
 #include <vector>
 
+#include <boost/lockfree/queue.hpp>
+
 enum class WaveformType {
     Sine = 0,
     Sawtooth,
@@ -12,24 +14,24 @@ enum class WaveformType {
     WhiteNoise
 };
 
-enum class PlaybackRequest {
+enum class PlaybackState {
     Play = 0,
-    Stop
+    Stop,
 };
 
 enum Channels : size_t { Number = 1 };
 enum Samples : size_t { Rate = 44100 };
-enum Buffer : size_t { Frames = 256 };
+enum Buffer : size_t { Frames = 128 };
 
 struct AudioTask {
-    PlaybackRequest playback_state { PlaybackRequest::Play };
+    PlaybackState playback_state { PlaybackState::Play };
     WaveformType waveform_type { WaveformType::Sine };
     float frequency { 440.0f };
     float amplitude { 1.0f };
     float phase { 0.0f };
 };
 
-using WaveformBuffer = std::vector<float>;
-using DispatchMap = std::unordered_map<WaveformType, std::function<std::vector<float>(const AudioTask&)>>;
+using AudioQueue = boost::lockfree::queue<float>;
+using DispatchMap = std::unordered_map<WaveformType, std::function<void(const AudioTask&)>>;
 
 #endif // AUDIO_DEFINITIONS_H

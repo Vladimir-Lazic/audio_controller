@@ -8,7 +8,7 @@
 
 class SocketObserver : public Observer {
 public:
-    void update(const WaveformBuffer&) override;
+    void update(const float&) override;
 
     std::optional<std::string> listen() override;
 

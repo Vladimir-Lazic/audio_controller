@@ -13,7 +13,7 @@ using namespace threading;
 
 class WorkerPool {
 public:
-    void loadTask(TaskType);
+    void loadWorker(TaskType);
 
     WorkerPool(size_t);
 

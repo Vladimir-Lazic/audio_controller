@@ -18,7 +18,7 @@ TEST_F(ThreadPoolTest, TaskSubmissionAndExecution)
     std::atomic<int> counter { 0 };
 
     for (int i = 0; i < 10; ++i) {
-        pool.loadTask([&counter]() {
+        pool.loadWorker([&counter]() {
             std::this_thread::sleep_for(50ms);
             ++counter;
         });
@@ -36,7 +36,7 @@ TEST_F(ThreadPoolTest, ProperDestructorShutdown)
     {
         ThreadPool pool { 2 };
         for (int i = 0; i < 5; ++i) {
-            pool.loadTask([counter]() {
+            pool.loadWorker([counter]() {
                 std::this_thread::sleep_for(100ms);
                 ++(*counter);
             });
@@ -53,7 +53,7 @@ TEST_F(ThreadPoolTest, ConcurrentExecution)
     std::atomic<int> maxConcurrent { 0 };
 
     for (int i = 0; i < 20; ++i) {
-        pool.loadTask([&]() {
+        pool.loadWorker([&]() {
             ++concurrentCount;
             int localMax = concurrentCount.load();
             maxConcurrent.store(std::max(maxConcurrent.load(), localMax));
@@ -71,7 +71,7 @@ TEST_F(ThreadPoolTest, ConcurrentExecution)
 TEST_F(ThreadPoolTest, SubmitAfterDestruction)
 {
     auto pool = std::make_unique<ThreadPool>(2);
-    pool->loadTask([]() {
+    pool->loadWorker([]() {
         std::this_thread::sleep_for(50ms);
     });
 

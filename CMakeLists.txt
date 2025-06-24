@@ -8,9 +8,10 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 find_package(GTest REQUIRED)
+find_package(Boost REQUIRED)
 find_package(RtAudio REQUIRED)
 
-include_directories(${RTAUDIO_INCLUDE_DIR})
+include_directories(${RTAUDIO_INCLUDE_DIR} ${Boost_INCLUDE_DIRS})
 
 #add_subdirectory(unit_tests)
 add_subdirectory(src)

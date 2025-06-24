@@ -16,11 +16,6 @@ SocketObserver::SocketObserver(const std::string& ip_addr,
         throw std::runtime_error("Unable to create socket");
     }
 
-    timeval timeout {}; // brief timeout so thread can check if alive status
-    timeout.tv_sec = 0;
-    timeout.tv_usec = 1000;
-    setsockopt(socket_fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
-
     sockaddr_in local_addr {};
     local_addr.sin_family = AF_INET;
     local_addr.sin_port = htons(local_port);
@@ -43,11 +38,11 @@ SocketObserver::~SocketObserver()
     std::cout << "Socket closed" << std::endl;
 }
 
-void SocketObserver::update(const WaveformBuffer& waveform_buffer)
+void SocketObserver::update(const float& sample)
 {
     sendto(socket_fd,
-        reinterpret_cast<const char*>(waveform_buffer.data()),
-        waveform_buffer.size() * sizeof(float),
+        reinterpret_cast<const char*>(&sample),
+        sizeof(float),
         0,
         (struct sockaddr*)&remote_addr,
         sizeof(remote_addr));

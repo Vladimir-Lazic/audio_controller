@@ -10,8 +10,8 @@
 
 class TaskPool {
 public:
-    void processRequest(const std::string&);
-    std::optional<AudioTask> query();
+    void loadTask(const std::string&);
+    std::optional<AudioTask> getTask();
 
 private:
     std::mutex task_mutex {};
