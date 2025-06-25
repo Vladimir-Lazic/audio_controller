@@ -21,7 +21,6 @@ public:
 
 private:
     std::shared_ptr<WorkerPool> worker_pool;
-
     std::shared_ptr<WaveformBuffer> waveform_buffer;
 
     std::atomic<bool> running { false };

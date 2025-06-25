@@ -75,7 +75,7 @@ AudioController::AudioController(std::shared_ptr<WorkerPool> workers, std::share
 
             notify(sample);
 
-            auto sleep_time = std::chrono::microseconds(1'000'000.0 / sample_rate);
+            auto sleep_time = std::chrono::microseconds(static_cast<int>(1'000'000.0 / sample_rate));
             std::this_thread::sleep_for(sleep_time);
         }
     });
