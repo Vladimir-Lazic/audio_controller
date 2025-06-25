@@ -54,18 +54,10 @@ AudioController::AudioController(std::shared_ptr<WorkerPool> workers, std::share
             if (local_task.playback_state == PlaybackState::Stop) {
                 sample = 0.0f;
             } else {
-                auto it = map.find(local_task.waveform_type);
-                if (it != map.end()) {
-                    sample = it->second(local_task, current_phase);
-                } else {
-                    sample = 0.0f;
-                }
-
-                if (local_task.waveform_type != WaveformType::WhiteNoise) {
-                    current_phase += phase_increment;
-                    if (current_phase >= 2.0f * std::numbers::pi) {
-                        current_phase -= 2.0f * std::numbers::pi;
-                    }
+                sample = map.find(local_task.waveform_type)->second(local_task, current_phase);
+                current_phase += phase_increment;
+                if (current_phase >= 2.0f * std::numbers::pi) {
+                    current_phase -= 2.0f * std::numbers::pi;
                 }
             }
 

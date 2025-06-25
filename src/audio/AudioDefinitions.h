@@ -34,4 +34,5 @@ struct AudioTask {
 
 using WaveformBuffer = boost::lockfree::queue<float>;
 using DispatchMap = std::unordered_map<WaveformType, std::function<float(const AudioTask&, float)>>;
+
 #endif // AUDIO_DEFINITIONS_H
